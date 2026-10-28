@@ -1,0 +1,95 @@
+rules_version = '2';
+
+// Vision, chapter 34. Anonymous auth only. No personal data beyond a display
+// name. No addresses, ever.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+
+    // ---------------------------------------------------------------- groups
+    match /groups/{groupId} {
+      function isMember() { return me() in resource.data.memberIds; }
+      function onlyChanges(keys) {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+      }
+
+      allow get, list: if signedIn() && isMember();
+
+      allow create: if signedIn()
+        && request.resource.data.ownerId == me()
+        && request.resource.data.memberIds == [me()]
+        && request.resource.data.totalLight == 0
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 30;
+
+      // Owner renames.
+      allow update: if signedIn() && resource.data.ownerId == me()
+        && onlyChanges(['name']);
+
+      // Anyone who knows the group id (from inviteCodes/{code}) may add
+      // themselves; members may remove themselves.
+      allow update: if signedIn()
+        && onlyChanges(['memberIds', 'memberNames'])
+        && (
+          request.resource.data.memberIds.toSet()
+            .difference(resource.data.memberIds.toSet()).hasOnly([me()])
+          ||
+          resource.data.memberIds.toSet()
+            .difference(request.resource.data.memberIds.toSet()).hasOnly([me()])
+        );
+
+      // Members add light (together with their lighting doc, in a transaction).
+      allow update: if signedIn() && isMember()
+        && onlyChanges(['totalLight'])
+        && request.resource.data.totalLight > resource.data.totalLight
+        && request.resource.data.totalLight - resource.data.totalLight <= 20;
+
+      allow delete: if signedIn() && resource.data.ownerId == me();
+
+      function groupMember() {
+        return me() in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+      }
+
+      match /lightings/{lightingId} {
+        allow read: if signedIn() && groupMember();
+        allow create: if signedIn() && groupMember()
+          && lightingId == me() + '_' + string(request.resource.data.night)
+          && request.resource.data.uid == me()
+          && request.resource.data.night >= 1 && request.resource.data.night <= 8;
+      }
+
+      match /nudges/{nudgeId} {
+        allow read: if signedIn() && groupMember();
+        allow create: if signedIn() && groupMember()
+          && request.resource.data.from == me()
+          && nudgeId == me() + '_' + request.resource.data.to + '_' + string(request.resource.data.night);
+      }
+    }
+
+    // ---------------------------------------------------------- invite codes
+    // Readable one by one (you need the code), never listable.
+    match /inviteCodes/{code} {
+      allow get: if signedIn();
+      // getAfter: the group is created in the same batch.
+      allow create: if signedIn()
+        && getAfter(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerId == me();
+      allow delete: if signedIn()
+        && get(/databases/$(database)/documents/groups/$(resource.data.groupId)).data.ownerId == me();
+    }
+
+    // ------------------------------------------------ "come light with me"
+    match /invites/{inviteId} {
+      allow get: if signedIn();
+      allow list: if signedIn() && resource.data.hostId == me();
+      allow create: if signedIn() && request.resource.data.hostId == me()
+        && request.resource.data.note.size() <= 120;
+      allow delete: if signedIn() && resource.data.hostId == me();
+      // Guests write only their own RSVP.
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rsvps'])
+        && request.resource.data.rsvps.diff(resource.data.rsvps).affectedKeys().hasOnly([me()]);
+    }
+  }
+}

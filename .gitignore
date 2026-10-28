@@ -1,0 +1,29 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock.bak
+*.iml
+.idea/
+.vscode/
+.DS_Store
+
+# Generated platform build output
+app/android/.gradle/
+app/android/local.properties
+app/android/app/release/
+app/ios/Pods/
+app/ios/.symlinks/
+app/ios/Flutter/Generated.xcconfig
+app/ios/Flutter/flutter_export_environment.sh
+app/ios/Runner/GeneratedPluginRegistrant.*
+
+# Firebase secrets stay local until we decide otherwise
+app/android/app/google-services.json
+app/ios/Runner/GoogleService-Info.plist
+.firebase/
+
+# Python
+__pycache__/

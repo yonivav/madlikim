@@ -998,19 +998,20 @@ app/assets/content/
 ```
 groups/{groupId}
   name, emoji, ownerId, inviteCode, year, totalLight, createdAt
-groups/{groupId}/members/{userId}
-  displayName, joinedAt, invitedBy
-groups/{groupId}/lightings/{userId_night}
-  userId, night, markedAt, light
+  memberIds: [uid]              ← לשאילתות ולחוקי אבטחה
+  memberNames: {uid: name}
+groups/{groupId}/lightings/{uid_night}
+  uid, night, light, markedAt
 groups/{groupId}/nudges/{from_to_night}
-  from, to, night, sentAt
+  from, fromName, to, night, sentAt
 inviteCodes/{code}
   groupId
 invites/{inviteId}
   hostId, hostName, year, night, time, note, createdAt
-invites/{inviteId}/rsvps/{userId}
-  displayName, status
+  rsvps: {uid: {name, status}}
 ```
+
+(בטיוטה הראשונה החברים וה-RSVP היו תת-אוספים. במימוש הם שדות במסמך: פחות קריאות, וחוקי אבטחה פשוטים יותר. מתאים לקבוצות של עד מאות אנשים.)
 
 ### 34.3 כללים
 - קריאה וכתיבה לקבוצה: רק חברים בה.

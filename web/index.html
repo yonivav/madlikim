@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>מדליקים</title>
+  <meta name="description" content="מדליקים נרות חנוכה, כל ערב, עם חברים.">
+  <meta property="og:title" content="מדליקים 🕎">
+  <meta property="og:description" content="הזמינו אותך להדליק נרות חנוכה ביחד">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --night: #0E1A2B; --deep: #08111E; --card: #16263D;
+      --gold: #F5B942; --cream: #FFF6E5; --muted: #8A94A6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--night); color: var(--cream);
+      font-family: Heebo, system-ui, sans-serif; display: flex; align-items: center;
+      justify-content: center; padding: 16px;
+    }
+    main { width: 100%; max-width: 420px; text-align: center; }
+    .menorah { font-size: 72px; margin-bottom: 8px; }
+    h1 { font-size: 30px; font-weight: 900; margin: 0 0 8px; }
+    p { color: #C9CED8; line-height: 1.6; margin: 0 0 20px; }
+    .code {
+      background: var(--card); border-radius: 16px; padding: 16px; margin: 0 0 20px;
+      font-size: 34px; font-weight: 900; letter-spacing: 8px; direction: ltr;
+    }
+    .code small { display: block; font-size: 13px; letter-spacing: 0; color: var(--muted); font-weight: 400; }
+    a.btn {
+      display: block; background: var(--gold); color: var(--deep); text-decoration: none;
+      font-weight: 700; font-size: 18px; padding: 16px; border-radius: 16px; margin-bottom: 10px;
+    }
+    a.btn.secondary { background: transparent; color: var(--cream); border: 1px solid var(--muted); }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="menorah">🕎</div>
+    <h1 id="title">מדליקים</h1>
+    <p id="text">מדליקים נרות חנוכה, כל ערב, עם חברים.</p>
+    <div id="codeBox" class="code hidden"><small>הקוד להצטרפות</small><span id="code"></span></div>
+    <a id="open" class="btn hidden" href="#">לפתוח באפליקציה</a>
+    <!-- TODO: real store links once the app is published -->
+    <a class="btn secondary" href="#" id="ios">להורדה ל-iPhone</a>
+    <a class="btn secondary" href="#" id="android">להורדה לאנדרואיד</a>
+  </main>
+  <script>
+    (function () {
+      var parts = location.pathname.split('/').filter(Boolean);
+      var kind = parts[0], value = parts[1];
+      if (!value) return;
+      var open = document.getElementById('open');
+      if (kind === 'j') {
+        document.getElementById('title').textContent = 'הוזמנת לחנוכייה משותפת!';
+        document.getElementById('text').textContent =
+          'כל מי שמדליק אצלו בבית מוסיף אור לחנוכייה של כולם. מורידים את האפליקציה ומכניסים את הקוד:';
+        document.getElementById('code').textContent = value.toUpperCase();
+        document.getElementById('codeBox').classList.remove('hidden');
+        open.href = 'madlikim://j/' + encodeURIComponent(value);
+        open.classList.remove('hidden');
+      } else if (kind === 'i') {
+        document.getElementById('title').textContent = 'הוזמנת להדליק ביחד!';
+        document.getElementById('text').textContent =
+          'פותחים באפליקציה כדי לראות מתי, ולסמן אם מגיעים.';
+        open.href = 'madlikim://i/' + encodeURIComponent(value);
+        open.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>
