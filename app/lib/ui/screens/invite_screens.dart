@@ -49,8 +49,9 @@ class _InviteCreateScreenState extends ConsumerState<InviteCreateScreen> {
   Future<void> _create() async {
     final night = _night;
     if (night == null) return;
+    final myName = await ensureDisplayName(context, ref);
+    if (myName == null) return;
     setState(() => _busy = true);
-    final profile = ref.read(profileProvider)!;
     final season = ref.read(seasonProvider);
     final time =
         '${_time.hour.toString().padLeft(2, '0')}:${_time.minute.toString().padLeft(2, '0')}';
@@ -60,7 +61,7 @@ class _InviteCreateScreenState extends ConsumerState<InviteCreateScreen> {
             night: night,
             time: time,
             note: _note.text.trim(),
-            myName: profile.displayName,
+            myName: myName,
           );
       await ref
           .read(localStoreProvider)
@@ -283,10 +284,12 @@ class InviteScreen extends ConsumerWidget {
                             label: Text(label),
                             selected: myStatus == s,
                             onSelected: (_) async {
+                              final myName = await ensureDisplayName(context, ref);
+                              if (myName == null) return;
                               await social.rsvp(
                                 inviteId: invite.id,
                                 status: s,
-                                myName: ref.read(profileProvider)!.displayName,
+                                myName: myName,
                               );
                               await ref
                                   .read(localStoreProvider)

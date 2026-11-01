@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/place.dart';
 import '../../models/user_profile.dart';
+import '../../state/providers.dart';
 import '../theme.dart';
 
 /// Picks the right form of a phrase (Vision 6: אתה / את / אתם).
@@ -36,6 +38,39 @@ String nightLetter(int night) => '${'אבגדהוזח'[night - 1]}׳';
 
 Future<void> shareText(String text) =>
     SharePlus.instance.share(ShareParams(text: text));
+
+/// A display name is only needed for the social layer (invites, groups,
+/// nudges). Call this right before such an action: if the profile already
+/// has a name it returns it immediately; otherwise it asks for one, saves
+/// it, and returns it. Returns null if the user cancels.
+Future<String?> ensureDisplayName(BuildContext context, WidgetRef ref) async {
+  final profile = ref.read(profileProvider)!;
+  if (profile.displayName.isNotEmpty) return profile.displayName;
+  final controller = TextEditingController();
+  final name = await showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('איך לקרוא לך?'),
+      content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 20,
+          decoration: const InputDecoration(hintText: 'השם שלך')),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(ctx), child: const Text('ביטול')),
+        FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('אישור')),
+      ],
+    ),
+  );
+  if (name == null || name.isEmpty) return null;
+  await ref
+      .read(profileProvider.notifier)
+      .save(profile.copyWith(displayName: name));
+  return name;
+}
 
 /// The primary action: a brass bar that glows a little.
 class BrassButton extends StatelessWidget {

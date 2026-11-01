@@ -44,16 +44,20 @@ class HomeScreen extends ConsumerWidget {
                   Expanded(
                     child: Text.rich(
                       TextSpan(
-                        text: '${greeting(now, profile.place)}, ',
+                        text: profile.displayName.isEmpty
+                            ? greeting(now, profile.place)
+                            : '${greeting(now, profile.place)}, ',
                         style: AppText.small.copyWith(fontSize: 15),
-                        children: [
-                          TextSpan(
-                            text: profile.displayName,
-                            style: const TextStyle(
-                                color: AppColors.parch,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ],
+                        children: profile.displayName.isEmpty
+                            ? null
+                            : [
+                                TextSpan(
+                                  text: profile.displayName,
+                                  style: const TextStyle(
+                                      color: AppColors.parch,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
                       ),
                     ),
                   ),

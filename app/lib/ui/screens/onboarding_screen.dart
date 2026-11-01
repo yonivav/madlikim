@@ -164,8 +164,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           textInputAction: TextInputAction.next,
           style: const TextStyle(fontSize: 20),
           decoration: const InputDecoration(hintText: 'השם שלך'),
-          onChanged: (_) => setState(() {}),
         ),
+        const SizedBox(height: 4),
+        const Text(
+            'אפשר גם בלי. רק אם תרצו להזמין חברים או לשתף חנוכייה, נבקש שם אז.',
+            style: TextStyle(color: AppColors.mist, fontSize: 13)),
         const SizedBox(height: 16),
         const Text('איך לפנות אליך?', style: TextStyle(color: AppColors.mist)),
         const SizedBox(height: 8),
@@ -185,10 +188,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ],
         ),
         const SizedBox(height: 40),
-        BrassButton(
-          label: 'יאללה',
-          onPressed: _name.text.trim().isEmpty ? null : _next,
-        ),
+        BrassButton(label: 'יאללה', onPressed: _next),
       ],
     );
   }

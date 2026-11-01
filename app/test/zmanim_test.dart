@@ -13,7 +13,7 @@ void main() {
 
   void near(DateTime actual, DateTime expected, {int minutes = 2}) {
     expect(actual.difference(expected).inMinutes.abs(),
-        lessThanOrEqualTo: minutes,
+        lessThanOrEqualTo(minutes),
         reason: 'got ${actual.toUtc()} expected ${expected.toUtc()}');
   }
 
