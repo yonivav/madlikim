@@ -94,7 +94,7 @@ class _InviteCreateScreenState extends ConsumerState<InviteCreateScreen> {
           const SizedBox(height: 8),
           if (upcoming.isEmpty)
             const Text('חנוכה השנה כבר נגמר. נתראה בשנה הבאה 🕎',
-                style: TextStyle(color: AppColors.muted)),
+                style: TextStyle(color: AppColors.mist)),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -133,7 +133,7 @@ class _InviteCreateScreenState extends ConsumerState<InviteCreateScreen> {
           const SizedBox(height: 4),
           const Text(
             'את הכתובת שולחים בוואטסאפ. אנחנו לא שומרים כתובות.',
-            style: TextStyle(color: AppColors.muted, fontSize: 13),
+            style: TextStyle(color: AppColors.mist, fontSize: 13),
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
@@ -179,7 +179,7 @@ class InvitesListScreen extends ConsumerWidget {
                             style: const TextStyle(
                                 fontSize: 17, fontWeight: FontWeight.w700)),
                         Text('${i.time} · ${i.count(RsvpStatus.yes)} מגיעים',
-                            style: const TextStyle(color: AppColors.muted)),
+                            style: const TextStyle(color: AppColors.mist)),
                       ],
                     ),
                   ),
@@ -223,7 +223,7 @@ class InviteScreen extends ConsumerWidget {
                 appBar: AppBar(),
                 body: const Center(
                     child: Text('ההזמנה הזו כבר לא קיימת',
-                        style: TextStyle(color: AppColors.muted))),
+                        style: TextStyle(color: AppColors.mist))),
               );
             }
             final mine = invite.hostId == me;
@@ -262,7 +262,7 @@ class InviteScreen extends ConsumerWidget {
                       child: Text(invite.note,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              fontSize: 17, color: AppColors.silver)),
+                              fontSize: 17, color: AppColors.mist)),
                     ),
                   ],
                   const SizedBox(height: 24),

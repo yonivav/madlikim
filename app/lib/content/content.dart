@@ -27,15 +27,31 @@ class Blessing {
 }
 
 class Song {
-  const Song(
-      {required this.id,
-      required this.title,
-      required this.when,
-      required this.text});
+  const Song({
+    required this.id,
+    required this.title,
+    required this.when,
+    required this.stanzas,
+    this.key,
+    this.repeatLast = false,
+    this.variantNote,
+  });
+
   final String id;
   final String title;
   final String when;
-  final String text;
+
+  /// Lines in ChordPro format ("[D]מָעוֹז [G]צוּר"); chords are optional.
+  final List<List<String>> stanzas;
+
+  /// Key the chords are written in, when the song has chords.
+  final String? key;
+
+  /// The last line of each stanza is sung twice.
+  final bool repeatLast;
+  final String? variantNote;
+
+  bool get hasChords => key != null;
 }
 
 class FaqItem {
@@ -75,13 +91,21 @@ class ContentBook {
         lightingOrder =
             Map<String, String>.from(blessings['order'] as Map<String, dynamic>),
         safety = blessings['safety'] as String,
+        steps = Map<String, String>.from(
+            blessings['steps'] as Map<String, dynamic>? ?? const {}),
         songList = [
           for (final s in (songs['songs'] as List))
             Song(
               id: s['id'] as String,
               title: s['title'] as String,
               when: s['when'] as String,
-              text: s['text'] as String,
+              stanzas: [
+                for (final st in (s['stanzas'] as List))
+                  (st as List).cast<String>(),
+              ],
+              key: s['key'] as String?,
+              repeatLast: s['repeatLast'] as bool? ?? false,
+              variantNote: s['variantNote'] as String?,
             ),
         ],
         faqList = [
@@ -110,6 +134,9 @@ class ContentBook {
   final List<Blessing> blessingList;
   final Map<String, String> lightingOrder;
   final String safety;
+
+  /// The three lighting steps (place / bless / light, and *First variants).
+  final Map<String, String> steps;
   final List<Song> songList;
   final List<FaqItem> faqList;
 

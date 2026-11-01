@@ -17,30 +17,37 @@ class FaqScreen extends ConsumerWidget {
         title: const Text('למה ואיך'),
         actions: [UnreviewedMark(reviewed: content.reviewed)],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(20),
-        itemCount: content.faqList.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
-        itemBuilder: (_, i) {
-          final item = content.faqList[i];
-          return Card(
-            clipBehavior: Clip.antiAlias,
-            child: ExpansionTile(
-              shape: const Border(),
-              collapsedShape: const Border(),
-              iconColor: AppColors.gold,
-              title: Text(item.question,
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-              childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              expandedAlignment: AlignmentDirectional.centerStart,
-              children: [
-                Text(item.answer,
-                    style:
-                        const TextStyle(height: 1.5, color: AppColors.silver)),
-              ],
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
+        children: [
+          for (var i = 0; i < content.faqList.length; i++)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                border: i == 0
+                    ? null
+                    : const Border(top: BorderSide(color: AppColors.line)),
+              ),
+              child: Theme(
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  shape: const Border(),
+                  collapsedShape: const Border(),
+                  iconColor: AppColors.brass,
+                  collapsedIconColor: AppColors.mist,
+                  title: Text(content.faqList[i].question,
+                      style: AppText.heading),
+                  childrenPadding: const EdgeInsets.only(bottom: 16),
+                  expandedAlignment: AlignmentDirectional.centerStart,
+                  children: [
+                    Text(content.faqList[i].answer,
+                        style: AppText.body.copyWith(color: AppColors.mist)),
+                  ],
+                ),
+              ),
             ),
-          );
-        },
+        ],
       ),
     );
   }

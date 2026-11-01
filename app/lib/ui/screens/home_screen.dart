@@ -6,8 +6,10 @@ import '../../core/hanukkah.dart';
 import '../../social/social_models.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
+import '../widgets/avatars.dart';
 import '../widgets/common.dart';
 import '../widgets/menorah.dart';
+import '../widgets/window_scene.dart';
 import 'faq_screen.dart';
 import 'groups_screen.dart';
 import 'invite_screens.dart';
@@ -28,62 +30,97 @@ class HomeScreen extends ConsumerWidget {
     }
     final profile = ref.watch(profileProvider)!;
     final now = ref.watch(nowProvider).valueOrNull ?? DateTime.now().toUtc();
+    final lit = ref.watch(litNightsProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '${greeting(now, profile.place)}, ${profile.displayName}',
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.w800),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'הגדרות',
-                  icon: const Icon(Icons.settings_outlined),
-                  onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const SettingsScreen())),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _TonightCard(snap: snap),
-            const SizedBox(height: 16),
-            const _MiniMenorahCard(),
-            const SizedBox(height: 16),
-            const _FriendsCard(),
-            const SizedBox(height: 16),
-            const _InviteCard(),
-            const SizedBox(height: 16),
-            SectionCard(
-              onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const FaqScreen())),
-              child: const Row(
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          WindowScene(
+            overlay: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 12, 0),
+              child: Row(
                 children: [
-                  Icon(Icons.lightbulb_outline, color: AppColors.gold),
-                  SizedBox(width: 12),
                   Expanded(
-                      child: Text('למה ואיך',
-                          style: TextStyle(fontWeight: FontWeight.w700))),
-                  Icon(Icons.chevron_left),
+                    child: Text.rich(
+                      TextSpan(
+                        text: '${greeting(now, profile.place)}, ',
+                        style: AppText.small.copyWith(fontSize: 15),
+                        children: [
+                          TextSpan(
+                            text: profile.displayName,
+                            style: const TextStyle(
+                                color: AppColors.parch,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'הגדרות',
+                    style: IconButton.styleFrom(
+                        backgroundColor: const Color(0x0FF3E9D7)),
+                    icon: const Icon(Icons.settings_outlined,
+                        color: AppColors.mist, size: 20),
+                    onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const SettingsScreen())),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
+            child: _sceneMenorah(snap, lit),
+          ),
+          _Tonight(snap: snap),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(24, 22, 24, 40),
+            child: _Rows(),
+          ),
+        ],
       ),
     );
   }
+
+  /// What stands on the windowsill depends on the moment.
+  Widget _sceneMenorah(PhaseSnapshot snap, Set<int> lit) {
+    final n = snap.night;
+    switch (snap.phase) {
+      case AppPhase.lightingWindow:
+      case AppPhase.hanukkahDay:
+        return Menorah(
+          placed: {for (var i = 0; i < n!.number; i++) i},
+          height: 230,
+          glow: .35,
+        );
+      case AppPhase.litTonight:
+        final all = {for (var i = 0; i < n!.number; i++) i};
+        return Menorah(placed: all, lit: all, shamashLit: true, height: 230);
+      case AppPhase.afterHanukkah:
+        final positions = {for (final x in lit) x - 1};
+        return Menorah(
+            placed: positions,
+            lit: positions,
+            shamashLit: positions.isNotEmpty,
+            height: 230,
+            glow: .6);
+      default:
+        return const Menorah(height: 230);
+    }
+  }
 }
 
-class _TonightCard extends ConsumerWidget {
-  const _TonightCard({required this.snap});
+class _Tonight extends ConsumerWidget {
+  const _Tonight({required this.snap});
   final PhaseSnapshot snap;
+
+  void _openLighting(BuildContext context, WidgetRef ref, HanukkahNight n) {
+    ref
+        .read(localStoreProvider)
+        .logEvent('lighting_screen_open', {'night': n.number, 'source': 'home'});
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => LightingScreen(night: n)));
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -92,227 +129,249 @@ class _TonightCard extends ConsumerWidget {
     final place = profile.place;
     final night = snap.night;
 
-    void openLighting(HanukkahNight n) {
-      ref
-          .read(localStoreProvider)
-          .logEvent('lighting_screen_open', {'night': n.number, 'source': 'home'});
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => LightingScreen(night: n)));
-    }
-
+    String mark; // the big brass thing on the right
     String title;
-    String? subtitle;
+    String? sub;
+    InlineSpan? when;
     Widget? action;
+
+    TextSpan time(String t) => TextSpan(
+        text: t,
+        style: const TextStyle(
+            color: AppColors.flame, fontWeight: FontWeight.w700));
 
     switch (snap.phase) {
       case AppPhase.offSeason:
-        title = content.text('home.offSeason');
-        subtitle = 'עוד ${snap.daysUntilStart} ימים · '
-            'נר ראשון ב-${snap.season.first.day}.${snap.season.first.month}';
       case AppPhase.countdown:
-        title = content.text('home.countdown',
-            vars: {'count': snap.daysUntilStart});
-        subtitle = say(profile.addressForm,
-            m: 'יש לך נרות בבית? זה הזמן לקנות, לפני שנגמרים בסופר.',
-            f: 'יש לך נרות בבית? זה הזמן לקנות, לפני שנגמרים בסופר.',
-            p: 'יש נרות בבית? זה הזמן לקנות, לפני שנגמרים בסופר.');
+        mark = '${snap.daysUntilStart}';
+        title = snap.phase == AppPhase.countdown
+            ? 'ימים לחנוכה'
+            : content.text('home.offSeason');
+        sub = 'נר ראשון ב־${snap.season.first.day}.${snap.season.first.month}';
+        if (snap.phase == AppPhase.countdown) {
+          when = TextSpan(
+              text: say(profile.addressForm,
+                  m: 'יש לך נרות בבית? זה הזמן לקנות.',
+                  f: 'יש לך נרות בבית? זה הזמן לקנות.',
+                  p: 'יש נרות בבית? זה הזמן לקנות.'));
+        }
       case AppPhase.eveOfHanukkah:
-        title = content.text('home.eve');
         final first = snap.season.first;
-        subtitle = 'מחר: נר ראשון, מדליקים מ-${hhmm(first.windowStart, place)}. '
-            'צריך: נרות, חנוכייה, גפרורים 🕯️';
+        mark = 'מחר';
+        title = 'מתחילים';
+        sub = first.hebrewDateLabel;
+        when = TextSpan(children: [
+          const TextSpan(text: 'נר ראשון, מדליקים מ־'),
+          time(hhmm(first.windowStart, place)),
+        ]);
         action = OutlinedButton(
-          onPressed: () => openLighting(first),
+          onPressed: () => _openLighting(context, ref, first),
           child: const Text('ללמוד את הברכות מראש'),
         );
       case AppPhase.hanukkahDay:
         final n = night!;
-        title = content.text('home.today', vars: {'title': n.title});
-        subtitle = switch (n.kind) {
-          NightKind.erevShabbat =>
-            'ערב שבת: מדליקים לפני ${hhmm(n.preferredUntil, place)}',
-          NightKind.motzeiShabbat =>
-            'מדליקים אחרי צאת השבת, ${hhmm(n.windowStart, place)}',
-          NightKind.weekday => 'מדליקים מ-${hhmm(n.windowStart, place)}',
+        mark = nightLetter(n.number);
+        title = n.title;
+        sub = n.hebrewDateLabel;
+        when = switch (n.kind) {
+          NightKind.erevShabbat => TextSpan(children: [
+              const TextSpan(text: 'ערב שבת: מדליקים לפני '),
+              time(hhmm(n.preferredUntil, place)),
+            ]),
+          NightKind.motzeiShabbat => TextSpan(children: [
+              const TextSpan(text: 'מדליקים אחרי צאת השבת, '),
+              time(hhmm(n.windowStart, place)),
+            ]),
+          NightKind.weekday => TextSpan(children: [
+              const TextSpan(text: 'מדליקים מ־'),
+              time(hhmm(n.windowStart, place)),
+            ]),
         };
         action = OutlinedButton(
-          onPressed: () => openLighting(n),
+          onPressed: () => _openLighting(context, ref, n),
           child: const Text('לראות מה עושים'),
         );
       case AppPhase.lightingWindow:
         final n = night!;
-        title = content.text('home.window', vars: {'title': n.title});
-        subtitle = n.kind == NightKind.erevShabbat
-            ? 'כניסת שבת ב-${hhmm(n.preferredUntil, place)}'
-            : '${n.number} נרות + שמש';
-        action = FilledButton.icon(
-          onPressed: () => openLighting(n),
-          icon: const Icon(Icons.local_fire_department),
-          label: const Text('מדליקים'),
+        mark = nightLetter(n.number);
+        title = n.title;
+        sub = n.hebrewDateLabel;
+        when = n.kind == NightKind.erevShabbat
+            ? TextSpan(children: [
+                const TextSpan(text: 'מדליקים עכשיו. כניסת שבת ב־'),
+                time(hhmm(n.preferredUntil, place)),
+              ])
+            : TextSpan(children: [
+                const TextSpan(text: 'אפשר להדליק עכשיו. עדיף עד '),
+                time(hhmm(n.preferredUntil, place)),
+              ]);
+        action = BrassButton(
+          label: 'מדליקים',
+          onPressed: () => _openLighting(context, ref, n),
         );
       case AppPhase.litTonight:
         final n = night!;
-        title = content.text('home.lit', vars: {'title': n.title});
-        subtitle = n.isLast
-            ? 'וזאת חנוכה. סיימת יפה 🕎'
-            : 'החנוכייה שלך מאירה. נתראה מחר בערב.';
-        action = OutlinedButton(
-          onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SongsScreen())),
-          child: const Text('הנרות הללו / מעוז צור'),
+        mark = nightLetter(n.number);
+        title = n.isLast ? 'וזאת חנוכה' : n.title;
+        sub = n.hebrewDateLabel;
+        when = TextSpan(
+            text: n.isLast
+                ? 'כל שמונת הנרות. סיימת יפה.'
+                : 'החנוכייה שלך מאירה. נתראה מחר בערב.');
+        action = OutlinedButton.icon(
+          onPressed: () => Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => const SongsScreen())),
+          icon: const Icon(Icons.music_note_outlined, size: 20),
+          label: const Text('מעוז צור, עם אקורדים'),
         );
       case AppPhase.afterHanukkah:
         final score = ref.watch(scoreProvider);
-        title = content.text('home.after');
-        subtitle = 'הדלקת ${score.nightsLit} מתוך 8 לילות · ${score.light} אור';
+        mark = '${score.nightsLit}';
+        title = 'לילות השנה';
+        sub = '${score.light} אור';
+        when = TextSpan(text: content.text('home.after'));
         action = OutlinedButton.icon(
-          onPressed: () => shareText(content.text('share.summary', vars: {
-            'nights': score.nightsLit,
-            'light': score.light,
-            'link': content.appLink,
-          })),
-          icon: const Icon(Icons.share),
+          onPressed: () {
+            ref.read(localStoreProvider).logEvent('share_tapped', {'kind': 'summary'});
+            shareText(content.text('share.summary', vars: {
+              'nights': score.nightsLit,
+              'light': score.light,
+              'link': content.appLink,
+            }));
+          },
+          icon: const Icon(Icons.ios_share, size: 20),
           label: const Text('לשתף את הסיכום'),
         );
       case AppPhase.shabbat:
+        mark = '';
         title = content.text('home.shabbat');
     }
 
-    return SectionCard(
-      highlight: snap.phase == AppPhase.lightingWindow,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (night != null)
-            Text(night.hebrewDateLabel,
-                style: const TextStyle(color: AppColors.muted)),
-          Text(title,
-              style:
-                  const TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
-          if (subtitle != null) ...[
-            const SizedBox(height: 6),
-            Text(subtitle,
-                style: const TextStyle(fontSize: 16, color: AppColors.silver)),
-          ],
-          if (action != null) ...[const SizedBox(height: 16), action],
-        ],
-      ),
-    );
-  }
-}
-
-class _MiniMenorahCard extends ConsumerWidget {
-  const _MiniMenorahCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final lit = ref.watch(litNightsProvider);
-    final score = ref.watch(scoreProvider);
-    final positions = {for (final n in lit) n - 1};
-    return SectionCard(
-      onTap: () => Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => const MyMenorahScreen())),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Expanded(
-                child: Text('החנוכייה שלי',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 84),
+                child: Text(
+                  mark,
+                  textAlign: TextAlign.center,
+                  style: mark.length > 2
+                      ? AppText.numeral.copyWith(fontSize: 64, height: 1.2)
+                      : AppText.numeral,
+                ),
               ),
-              Text('${score.light} אור ✨',
-                  style: const TextStyle(color: AppColors.gold)),
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 6),
+                    Text(title, style: AppText.display.copyWith(fontSize: 32)),
+                    if (sub != null) ...[
+                      const SizedBox(height: 4),
+                      Text(sub, style: AppText.small),
+                    ],
+                    if (when != null) ...[
+                      const SizedBox(height: 10),
+                      Text.rich(when, style: AppText.body),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
-          Menorah(
-            placed: positions,
-            lit: positions,
-            shamashLit: positions.isNotEmpty,
-            height: 110,
-          ),
+          if (action != null) ...[const SizedBox(height: 20), action],
         ],
       ),
     );
   }
 }
 
-class _FriendsCard extends ConsumerWidget {
-  const _FriendsCard();
+class _Rows extends ConsumerWidget {
+  const _Rows();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final groups = ref.watch(myGroupsProvider).valueOrNull ?? const [];
-    final text = groups.isEmpty
-        ? 'פותחים חנוכייה משותפת עם המשפחה או החבר\'ה. כל הדלקה של מישהו מוסיפה אור.'
-        : groups.length == 1
-            ? '${groups.first.emoji} ${groups.first.name} · ${groups.first.totalLight} אור'
-            : '${groups.length} חנוכיות משותפות';
-    return SectionCard(
-      onTap: () => Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => const GroupsScreen())),
-      child: Row(
-        children: [
-          const Text('👨‍👩‍👧‍👦', style: TextStyle(fontSize: 28)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('החבר\'ה',
-                    style:
-                        TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
-                const SizedBox(height: 4),
-                Text(text, style: const TextStyle(color: AppColors.silver)),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_left),
-        ],
-      ),
-    );
-  }
-}
-
-class _InviteCard extends ConsumerWidget {
-  const _InviteCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final invites = ref.watch(myInvitesProvider).valueOrNull ?? const [];
+    final groups = ref.watch(myGroupsProvider).valueOrNull ?? const <Group>[];
+    final invites =
+        ref.watch(myInvitesProvider).valueOrNull ?? const <HostInvite>[];
+    final score = ref.watch(scoreProvider);
     final season = ref.watch(seasonProvider);
+
+    void go(Widget page) =>
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+
     final next = invites.isEmpty ? null : invites.first;
-    return SectionCard(
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => next == null
+
+    return Column(
+      children: [
+        if (groups.isEmpty)
+          HairlineRow(
+            first: true,
+            title: 'חנוכייה משותפת',
+            subtitle: 'עם המשפחה או החבר\'ה. כל מי שמדליק אצלו מוסיף אור.',
+            onTap: () => go(const GroupsScreen()),
+          )
+        else
+          _GroupRow(group: groups.first, more: groups.length - 1),
+        HairlineRow(
+          title: 'בואו להדליק אצלי',
+          subtitle: next == null
+              ? 'מזמינים חברים לערב אחד, עם סופגניות'
+              : '${season.night(next.night).title} ב־${next.time}, '
+                  '${next.count(RsvpStatus.yes)} מגיעים',
+          onTap: () => go(next == null
               ? const InviteCreateScreen()
-              : const InvitesListScreen())),
-      child: Row(
-        children: [
-          const Text('🏠', style: TextStyle(fontSize: 28)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('בואו להדליק אצלי',
-                    style:
-                        TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
-                const SizedBox(height: 4),
-                Text(
-                  next == null
-                      ? 'מזמינים חברים לערב אחד של חנוכה. סופגניות אופציונליות (אבל מומלצות).'
-                      : '${season.night(next.night).title} ב-${next.time} · '
-                          '${next.count(RsvpStatus.yes)} מגיעים',
-                  style: const TextStyle(color: AppColors.silver),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_left),
-        ],
-      ),
+              : const InvitesListScreen()),
+        ),
+        HairlineRow(
+          title: 'החנוכייה שלי',
+          subtitle: score.nightsLit == 0
+              ? 'כאן נאסף האור של כל הלילות'
+              : score.currentStreak >= 2
+                  ? '${score.light} אור, ${score.currentStreak} לילות ברצף'
+                  : '${score.light} אור, ${score.nightsLit} לילות',
+          onTap: () => go(const MyMenorahScreen()),
+        ),
+        HairlineRow(
+          title: 'שירים',
+          subtitle: 'הנרות הללו, מעוז צור עם אקורדים',
+          onTap: () => go(const SongsScreen()),
+        ),
+        HairlineRow(
+          title: 'למה ואיך',
+          subtitle: 'שאלות קצרות על ההדלקה',
+          onTap: () => go(const FaqScreen()),
+        ),
+      ],
+    );
+  }
+}
+
+class _GroupRow extends ConsumerWidget {
+  const _GroupRow({required this.group, required this.more});
+  final Group group;
+  final int more;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final night = ref.watch(socialNightProvider);
+    final data = ref.watch(groupNightProvider((group.id, night))).valueOrNull;
+    final litIds = data?.litMemberIds ?? const <String>{};
+    final title = more > 0 ? '${group.name} ועוד $more' : group.name;
+    return HairlineRow(
+      first: true,
+      title: title,
+      subtitle: '${litIds.length} מתוך ${group.members.length} כבר הדליקו הערב',
+      trailing: AvatarStack(members: group.members, litIds: litIds),
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) =>
+              more > 0 ? const GroupsScreen() : GroupScreen(groupId: group.id))),
     );
   }
 }

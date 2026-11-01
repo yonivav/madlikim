@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+@font-face { font-family: FRL; src: url(../../app/assets/fonts/FrankRuhlLibre.ttf); font-weight: 300 900; }
+@font-face { font-family: Heebo; src: url(../../app/assets/fonts/Heebo.ttf); font-weight: 100 900; }
+:root {
+  --sky: #101B33; --sky-deep: #0A1226; --glass: #1B2A4A; --glass-hi: #24365C;
+  --brass: #D9A441; --brass-hi: #F2C66B; --brass-lo: #9C6F22;
+  --flame: #FFC861; --ember: #F07F3C; --olive: #9DAA6A;
+  --parch: #F3E9D7; --mist: #9AA6BF; --line: rgba(243,233,215,.10);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #2b2f38; font-family: Heebo, sans-serif; color: var(--parch); padding: 32px; }
+.grid { display: flex; flex-wrap: wrap; gap: 32px; direction: rtl; }
+.phone { width: 390px; height: 844px; border-radius: 44px; overflow: hidden; position: relative;
+  background: var(--sky); box-shadow: 0 30px 60px rgba(0,0,0,.4); }
+.label { position: absolute; top: -26px; right: 8px; color: #aab; font-size: 13px; }
+.wrap { position: relative; }
+.status { height: 47px; }
+.serif { font-family: FRL, serif; }
+
+/* ---------- home: the window ---------- */
+.scene { position: relative; height: 410px; overflow: hidden;
+  background: radial-gradient(120% 70% at 50% 100%, #1d2c4f 0%, var(--sky-deep) 70%); }
+.stars i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff; opacity: .5; }
+.window { position: absolute; left: 38px; right: 38px; top: 62px; bottom: 54px;
+  border: 1.5px solid rgba(217,164,65,.28); border-bottom: none;
+  border-radius: 157px 157px 0 0; background: linear-gradient(180deg, rgba(36,54,92,.35), rgba(36,54,92,.05)); }
+.window::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1.5px; background: rgba(217,164,65,.18); }
+.sill { position: absolute; left: 22px; right: 22px; bottom: 40px; height: 14px; border-radius: 3px;
+  background: linear-gradient(180deg, #34476F, #22314F); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.menorah-wrap { position: absolute; left: 0; right: 0; bottom: 52px; height: 230px; }
+.topbar { position: absolute; top: 47px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 2; }
+.hello { font-size: 15px; color: var(--mist); }
+.hello b { color: var(--parch); font-weight: 600; }
+.icon-btn { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: rgba(243,233,215,.06); }
+
+.tonight { padding: 6px 24px 0; display: flex; gap: 18px; align-items: flex-start; }
+.numeral { font-family: FRL; font-weight: 700; font-size: 104px; line-height: .85; color: var(--brass);
+  text-shadow: 0 0 30px rgba(242,198,107,.25); min-width: 84px; text-align: center; }
+.tonight h1 { font-family: FRL; font-weight: 700; font-size: 32px; line-height: 1.1; }
+.tonight .heb { color: var(--mist); font-size: 14px; margin-top: 4px; }
+.tonight .when { margin-top: 10px; font-size: 16px; }
+.tonight .when b { color: var(--flame); font-weight: 700; }
+.cta { margin: 20px 24px 0; height: 58px; border-radius: 18px; background: linear-gradient(180deg, var(--brass-hi), var(--brass));
+  color: #1A1206; font-weight: 800; font-size: 19px; display: grid; place-items: center;
+  box-shadow: 0 10px 30px rgba(217,164,65,.28), inset 0 1px 0 rgba(255,255,255,.4); }
+.rows { margin: 22px 24px 0; }
+.rows .row:first-child { border-top: none; }
+.row { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); }
+.row .t { font-weight: 700; font-size: 16px; }
+.row .s { color: var(--mist); font-size: 14px; margin-top: 2px; }
+.row .grow { flex: 1; }
+.avatars { display: flex; flex-direction: row-reverse; }
+.av { width: 34px; height: 34px; border-radius: 50%; margin-left: -8px; border: 2px solid var(--sky);
+  display: grid; place-items: center; font-size: 14px; font-weight: 700; position: relative; }
+.av.lit::after { content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+  width: 7px; height: 10px; border-radius: 50% 50% 45% 45% / 65% 65% 35% 35%; background: radial-gradient(circle at 50% 70%, #fff4c9, var(--flame) 55%, var(--ember)); box-shadow: 0 0 8px var(--flame); }
+.chev { color: var(--mist); font-size: 20px; }
+
+/* ---------- lighting ---------- */
+.dark { background: var(--sky-deep); }
+.appbar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+.appbar .title { font-family: FRL; font-weight: 700; font-size: 20px; }
+.steps { margin: 4px 24px 0; }
+.step { display: flex; gap: 14px; padding: 9px 0; align-items: baseline; }
+.step .n { font-family: FRL; font-weight: 700; color: var(--brass); font-size: 18px; width: 18px; text-align: center; }
+.step .x { font-size: 15.5px; line-height: 1.45; }
+.step .x b { font-weight: 700; }
+.blessing { margin: 14px 18px 0; padding: 18px 20px 12px; border-radius: 22px; background: linear-gradient(180deg, #16223D, #121C33);
+  border: 1px solid rgba(217,164,65,.14); }
+.blessing p { font-family: FRL; font-size: 25px; line-height: 1.75; font-weight: 500; }
+.blessing .more { color: var(--brass); font-size: 14px; font-weight: 600; margin-top: 4px; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; color: #1A1206; background: var(--olive); border-radius: 8px; padding: 2px 9px; margin-bottom: 6px; }
+.dock { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 20px 30px;
+  background: linear-gradient(180deg, rgba(10,18,38,0), var(--sky-deep) 30%); }
+.dock .cta { margin: 0; }
+.seg { display: flex; justify-content: space-between; align-items: center; color: var(--mist); font-size: 14px; margin-bottom: 12px; }
+.switch { width: 44px; height: 26px; border-radius: 13px; background: #2A3A5E; position: relative; }
+.switch::after { content: ''; position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--mist); }
+
+/* ---------- celebrate ---------- */
+.celebrate { background: radial-gradient(90% 55% at 50% 42%, #2b2a3f 0%, #17192d 40%, var(--sky-deep) 75%); }
+.plus { font-family: FRL; font-weight: 800; font-size: 46px; color: var(--flame); text-align: center; text-shadow: 0 0 24px rgba(255,200,97,.45); }
+.line { font-size: 20px; text-align: center; line-height: 1.45; padding: 0 36px; margin-top: 10px; }
+.badge { margin: 18px auto 0; display: flex; gap: 10px; align-items: center; width: max-content; padding: 8px 14px 8px 16px;
+  border-radius: 14px; border: 1px solid rgba(157,170,106,.5); background: rgba(157,170,106,.1); font-size: 15px; }
+.ghost { margin: 10px 24px 0; height: 52px; border-radius: 16px; border: 1px solid rgba(243,233,215,.22); display: grid; place-items: center; font-weight: 600; }
+.spark { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--flame); box-shadow: 0 0 6px var(--flame); }
+
+/* ---------- songs ---------- */
+.songhead { padding: 0 24px; }
+.songhead h2 { font-family: FRL; font-size: 34px; font-weight: 700; }
+.songhead .s { color: var(--mist); font-size: 14px; margin-top: 4px; }
+.toolbar { display: flex; gap: 8px; margin: 14px 24px 6px; align-items: center; }
+.chip { height: 34px; padding: 0 14px; border-radius: 11px; background: #1B2A4A; display: grid; place-items: center; font-size: 14px; font-weight: 600; }
+.chip.on { background: var(--brass); color: #1A1206; }
+.key { display: flex; align-items: center; gap: 2px; margin-inline-start: auto; background: #1B2A4A; border-radius: 11px; height: 34px; padding: 0 4px; }
+.key span { width: 30px; text-align: center; font-weight: 700; }
+.key .k { width: 34px; font-family: Heebo; direction: ltr; color: var(--brass); }
+.stanza { padding: 12px 24px 6px; }
+.stanza .num { font-family: FRL; color: var(--brass); font-size: 15px; margin-bottom: 2px; }
+.cl { display: flex; flex-wrap: wrap; row-gap: 0; margin-bottom: 4px; }
+.seg2 { display: flex; flex-direction: column; }
+.seg2 .c { height: 18px; font-size: 13.5px; font-weight: 800; color: var(--brass); direction: ltr; text-align: right; padding-left: 4px; }
+.seg2 .w { font-family: FRL; font-size: 21px; line-height: 1.35; white-space: pre; }
+
+/* ---------- shabbat ---------- */
+.shabbat { background: radial-gradient(70% 45% at 50% 38%, #2a2433 0%, #141628 50%, #090f1f 85%); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.shabbat h2 { font-family: FRL; font-size: 48px; font-weight: 700; margin-top: 26px; }
+.shabbat p { color: var(--mist); font-size: 17px; line-height: 1.6; margin-top: 10px; padding: 0 50px; }
+</style>
+</head>
+<body>
+<div class="grid">
+
+<!-- 1. HOME -->
+<div class="wrap"><div class="label">בית</div>
+<div class="phone" id="home">
+  <div class="scene">
+    <div class="stars" id="stars"></div>
+    <div class="window"></div>
+    <div class="menorah-wrap" data-menorah='{"placed":4,"lit":[],"shamash":false,"glow":0.35}'></div>
+    <div class="sill"></div>
+    <div class="topbar">
+      <div class="hello">ערב טוב, <b>אבי</b></div>
+      <div class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9AA6BF" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></div>
+    </div>
+  </div>
+  <div class="tonight">
+    <div class="numeral">ד׳</div>
+    <div>
+      <h1>נר רביעי</h1>
+      <div class="heb">אור לכ״ח בכסלו</div>
+      <div class="when">אפשר להדליק עכשיו. עדיף עד <b>17:46</b></div>
+    </div>
+  </div>
+  <div class="cta">מדליקים</div>
+  <div class="rows">
+    <div class="row">
+      <div class="grow"><div class="t">משפחת כהן</div><div class="s">3 מתוך 7 כבר הדליקו הערב</div></div>
+      <div class="avatars">
+        <div class="av lit" style="background:#3A4E7A">נ</div>
+        <div class="av lit" style="background:#5A4A6E">ר</div>
+        <div class="av lit" style="background:#4A6050">ד</div>
+        <div class="av" style="background:#2A3A5E;color:#9AA6BF">+4</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="grow"><div class="t">בואו להדליק אצלי</div><div class="s">מזמינים חברים לערב אחד, עם סופגניות</div></div>
+      <div class="chev">‹</div>
+    </div>
+    <div class="row">
+      <div class="grow"><div class="t">החנוכייה שלי</div><div class="s">10 אור, 3 לילות ברצף</div></div>
+      <div class="chev">‹</div>
+    </div>
+    <div class="row">
+      <div class="grow"><div class="t">שירים</div><div class="s">הנרות הללו, מעוז צור עם אקורדים</div></div>
+      <div class="chev">‹</div>
+    </div>
+  </div>
+</div></div>
+
+<!-- 2. LIGHTING -->
+<div class="wrap"><div class="label">מסך הדלקה</div>
+<div class="phone dark">
+  <div class="status"></div>
+  <div class="appbar"><div style="width:24px;color:#9AA6BF">✕</div><div class="title">נר רביעי</div><div style="width:24px"></div></div>
+  <div style="height:200px;position:relative" data-menorah='{"placed":4,"lit":[],"shamash":true,"order":true,"glow":0.5}'></div>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div class="x">מניחים <b>4 נרות</b> מימין לשמאל</div></div>
+    <div class="step"><div class="n">2</div><div class="x">מדליקים את השמש ומברכים</div></div>
+    <div class="step"><div class="n">3</div><div class="x">מדליקים משמאל לימין, מהנר החדש</div></div>
+  </div>
+  <div class="blessing">
+    <p>בָּרוּךְ אַתָּה ה׳ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו וְצִוָּנוּ לְהַדְלִיק נֵר שֶׁל חֲנֻכָּה.</p>
+    <div class="more">מה זה אומר?</div>
+  </div>
+  <div class="dock">
+    <div class="seg"><span>הדלקנו עם אורחים</span><div class="switch"></div></div>
+    <div class="cta">הדלקתי</div>
+  </div>
+</div></div>
+
+<!-- 3. CELEBRATE -->
+<div class="wrap"><div class="label">אחרי "הדלקתי"</div>
+<div class="phone celebrate" id="cel">
+  <div class="status"></div>
+  <div style="height:120px"></div>
+  <div style="height:250px;position:relative" data-menorah='{"placed":4,"lit":[0,1,2,3],"shamash":true,"glow":1}'></div>
+  <div style="height:26px"></div>
+  <div class="plus" style="display:flex;justify-content:center;gap:10px"><span style="direction:ltr">+4</span><span>אור</span></div>
+  <div class="line">החנוכייה שלך מאירה.<br>גם השכנים רואים, אגב.</div>
+  <div class="badge"><span>🕯️</span><span>חצי חנוכייה: 4 לילות</span></div>
+  <div style="position:absolute;bottom:22px;left:0;right:0">
+    <div class="cta" style="margin-top:0">לשתף את החבר'ה</div>
+    <div class="ghost">מעוז צור, עם אקורדים</div><div style="text-align:center;color:#D9A441;font-weight:600;margin-top:12px">חזרה לבית</div>
+  </div>
+</div></div>
+
+<!-- 4. SONGS -->
+<div class="wrap"><div class="label">מעוז צור</div>
+<div class="phone dark">
+  <div class="status"></div>
+  <div class="appbar"><div style="width:24px;color:#9AA6BF">›</div><div></div><div style="width:24px"></div></div>
+  <div class="toolbar" style="margin-top:0"><div class="chip">הנרות הללו</div><div class="chip on">מעוז צור</div><div class="chip">מזמור שיר</div></div>
+  <div class="songhead" style="margin-top:14px"><h2>מָעוֹז צוּר</h2><div class="s">שרים אחרי ההדלקה. רוב המשפחות שרות את הבית הראשון, ויש ששרות את כולם.</div></div>
+  <div class="toolbar">
+    <div class="chip on">אקורדים</div>
+        <div class="key" style="direction:ltr"><span>−</span><span class="k">D</span><span>+</span></div>
+  </div>
+  <div class="stanza" id="stanza"></div>
+</div></div>
+
+<!-- 5. SHABBAT -->
+<div class="wrap"><div class="label">שבת</div>
+<div class="phone shabbat">
+  <svg width="120" height="130" viewBox="0 0 120 130" id="shabbatSvg"></svg>
+  <h2>שבת שלום</h2>
+  <p>החנוכייה ממשיכה במוצאי שבת.<br>נתראה ב־17:31.</p>
+</div></div>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------- menorah
+function flame(x, y, h, glow, id) {
+  const w = h * .42;
+  return `
+  <circle cx="${x}" cy="${y - h*.45}" r="${h*1.6}" fill="url(#halo)" opacity="${glow}"/>
+  <path d="M${x} ${y} C ${x-w} ${y-h*.28}, ${x-w*.35} ${y-h*.62}, ${x} ${y-h}
+           C ${x+w*.35} ${y-h*.62}, ${x+w} ${y-h*.28}, ${x} ${y} Z" fill="url(#flameG)"/>
+  <ellipse cx="${x}" cy="${y-h*.18}" rx="${w*.28}" ry="${h*.16}" fill="#7FA8FF" opacity=".55"/>`;
+}
+function menorahSVG(o) {
+  const W = 360, H = 230, cx = 180, s = 38;
+  const barY = 150, cupH = 9;
+  const slotX = i => cx + (i - 4) * s;                // i 0..8, 4 = shamash
+  const posX = p => p <= 3 ? slotX(8 - p) : slotX(7 - p); // p 0 = rightmost
+  const lit = new Set(o.lit || []);
+  let out = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="xMidYMax meet" style="position:absolute;inset:0;overflow:visible">
+  <defs>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2C66B"/><stop offset=".5" stop-color="#D9A441"/><stop offset="1" stop-color="#8E621C"/></linearGradient>
+    <linearGradient id="brassH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9C6F22"/><stop offset=".5" stop-color="#F2C66B"/><stop offset="1" stop-color="#9C6F22"/></linearGradient>
+    <linearGradient id="wax" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E9DCC4"/><stop offset=".45" stop-color="#FFF9EE"/><stop offset="1" stop-color="#D8C8AC"/></linearGradient>
+    <linearGradient id="flameG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".4" stop-color="#FFC861"/><stop offset="1" stop-color="#F07F3C"/></linearGradient>
+    <radialGradient id="halo"><stop offset="0" stop-color="#FFC861" stop-opacity=".55"/><stop offset=".5" stop-color="#FFC861" stop-opacity=".12"/><stop offset="1" stop-color="#FFC861" stop-opacity="0"/></radialGradient>
+    <radialGradient id="room" cx=".5" cy=".55" r=".6"><stop offset="0" stop-color="#FFC861" stop-opacity=".22"/><stop offset="1" stop-color="#FFC861" stop-opacity="0"/></radialGradient>
+  </defs>`;
+  const litCount = lit.size + (o.shamash ? 1 : 0);
+  if (litCount) out += `<ellipse cx="${cx}" cy="${barY-40}" rx="${180}" ry="${120}" fill="url(#room)" opacity="${Math.min(1, .25 + litCount * .1) * (o.glow ?? 1)}"/>`;
+  // base
+  out += `<path d="M${cx-46} ${H-6} Q ${cx} ${H-30} ${cx+46} ${H-6} Z" fill="url(#brass)"/>
+          <rect x="${cx-54}" y="${H-8}" width="108" height="6" rx="3" fill="url(#brassH)"/>`;
+  // stem with knots
+  out += `<rect x="${cx-4}" y="${barY}" width="8" height="${H-barY-22}" fill="url(#brassH)"/>
+          <ellipse cx="${cx}" cy="${barY+34}" rx="9" ry="5" fill="url(#brass)"/>`;
+  // arms: a gentle double arc under the bar
+  out += `<path d="M${slotX(0)} ${barY+3} Q ${cx-70} ${barY+44} ${cx} ${barY+44} Q ${cx+70} ${barY+44} ${slotX(8)} ${barY+3}"
+           fill="none" stroke="url(#brassH)" stroke-width="4.2"/>`;
+  out += `<path d="M${slotX(2)} ${barY+3} Q ${cx-36} ${barY+24} ${cx} ${barY+24} Q ${cx+36} ${barY+24} ${slotX(6)} ${barY+3}"
+           fill="none" stroke="url(#brassH)" stroke-width="3" opacity=".9"/>`;
+  // bar
+  out += `<rect x="${slotX(0)-14}" y="${barY}" width="${slotX(8)-slotX(0)+28}" height="9" rx="4.5" fill="url(#brass)"/>`;
+  // shamash post
+  const shY = barY - 46;
+  out += `<rect x="${cx-3.5}" y="${shY}" width="7" height="46" fill="url(#brassH)"/>`;
+  const cup = (x, y) => `<path d="M${x-13} ${y-cupH} Q ${x-11} ${y-1} ${x-4} ${y} L ${x+4} ${y} Q ${x+11} ${y-1} ${x+13} ${y-cupH} Z" fill="url(#brass)"/><rect x="${x-13}" y="${y-cupH-2}" width="26" height="3" rx="1.5" fill="#F2C66B"/>`;
+  const candle = (x, cupTop, burning, seed) => {
+    const top = cupTop - 46;
+    let c = `<rect x="${x-5}" y="${top}" width="10" height="46" rx="2" fill="url(#wax)"/>
+             <line x1="${x}" y1="${top}" x2="${x}" y2="${top-5}" stroke="#3a3028" stroke-width="1.6"/>`;
+    if (burning) c += flame(x, top - 4, 24 + (seed % 3), o.glow ?? 1);
+    return c;
+  };
+  // cups + candles
+  for (let p = 0; p < 8; p++) {
+    const x = posX(p);
+    out += cup(x, barY);
+    if (p < o.placed) out += candle(x, barY - cupH, lit.has(p), p);
+    if (o.order && p < o.placed && !lit.has(p)) {
+      const n = o.placed - p;
+      out += `<text x="${x}" y="${barY-cupH-14}" font-family="Heebo" font-weight="800" font-size="13" fill="#9C6F22" text-anchor="middle">${n}</text>`;
+    }
+  }
+  out += cup(cx, shY);
+  out += candle(cx, shY - cupH, o.shamash, 7);
+  out += '</svg>';
+  return out;
+}
+document.querySelectorAll('[data-menorah]').forEach(el => el.innerHTML = menorahSVG(JSON.parse(el.dataset.menorah)));
+
+// stars
+const st = document.getElementById('stars'); let seed = 7;
+const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+for (let i = 0; i < 40; i++) { const e = document.createElement('i'); e.style.left = (rnd()*390)+'px'; e.style.top = (rnd()*300)+'px'; e.style.opacity = .15 + rnd()*.5; st.appendChild(e); }
+
+// sparks on celebrate
+const cel = document.getElementById('cel');
+for (let i = 0; i < 14; i++) { const e = document.createElement('div'); e.className = 'spark'; e.style.left = (110 + rnd()*170)+'px'; e.style.top = (90 + rnd()*170)+'px'; e.style.opacity = .3 + rnd()*.7; cel.appendChild(e); }
+
+// shabbat candles
+document.getElementById('shabbatSvg').innerHTML = `
+  <defs>
+   <linearGradient id="wax2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E9DCC4"/><stop offset=".45" stop-color="#FFF9EE"/><stop offset="1" stop-color="#D8C8AC"/></linearGradient>
+   <linearGradient id="flameG2" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".4" stop-color="#FFC861"/><stop offset="1" stop-color="#F07F3C"/></linearGradient>
+   <radialGradient id="halo2"><stop offset="0" stop-color="#FFC861" stop-opacity=".5"/><stop offset="1" stop-color="#FFC861" stop-opacity="0"/></radialGradient>
+  </defs>
+  ${[40,80].map(x => `<rect x="${x-7}" y="52" width="14" height="70" rx="3" fill="url(#wax2)"/>
+     <circle cx="${x}" cy="34" r="34" fill="url(#halo2)"/>
+     <path d="M${x} 48 C ${x-11} 40, ${x-4} 28, ${x} 18 C ${x+4} 28, ${x+11} 40, ${x} 48 Z" fill="url(#flameG2)"/>`).join('')}`;
+
+// song with chords (ChordPro-ish)
+const stanzas = [["[D]מָעוֹז [G]צוּר יְשׁוּעָ[A]תִי", "[D]לְךָ [A]נָאֶה לְשַׁבֵּ[D]חַ", "[D]תִּכּוֹן [G]בֵּית תְּפִלָּ[A]תִי", "[D]וְשָׁם [A]תּוֹדָה נְזַבֵּ[D]חַ", "[G]לְעֵת [D]תָּכִין מַטְבֵּחַ", "[E]מִצָּר הַמְנַבֵּ[A]חַ", "[D]אָז אֶגְמֹר [G]בְּשִׁיר מִזְ[D]מוֹר", "[G]חֲנֻכַּת [A]הַמִּזְבֵּ[D]חַ"], ["[D]רָעוֹת [G]שָׂבְעָה נַפְ[A]שִׁי", "[D]בְּיָגוֹן [A]כֹּחִי כָּ[D]לָה", "[D]חַיַּי [G]מֵרְרוּ בְקֹ[A]שִׁי", "[D]בְּשִׁעְבּוּד [A]מַלְכוּת עֶגְ[D]לָה", "[G]וּבְיָדוֹ [D]הַגְּדוֹלָה", "[E]הוֹצִיא אֶת הַסְּגֻ[A]לָּה", "[D]חֵיל פַּרְעֹה [G]וְכָל זַרְ[D]עוֹ", "[G]יָרְדוּ [A]כְּאֶבֶן מְצוּ[D]לָה"]];
+const _unused = [
+  "[D]מָעוֹז צוּר [G]יְשׁוּעָ[A]תִי",
+  "[D]לְךָ נָאֶה [A]לְשַׁבֵּ[D]חַ",
+  "[D]תִּכּוֹן בֵּית [G]תְּפִלָּ[A]תִי",
+  "[D]וְשָׁם תּוֹדָה [A]נְזַבֵּ[D]חַ",
+  "[G]לְעֵת תָּכִין [D]מַטְבֵּחַ",
+  "[E]מִצָּר הַמְ[A]נַבֵּחַ",
+  "[D]אָז אֶגְמֹר [G]בְּשִׁיר [D]מִזְמוֹר",
+  "[G]חֲנֻכַּת [A]הַמִּזְבֵּ[D]חַ",
+];
+const stanza = document.getElementById('stanza');
+stanza.innerHTML = stanzas.map((lines, si) => '<div class="num" style="margin-top:'+(si?14:0)+'px">'+'אב'[si]+'</div>' + lines.map((l, li) => {
+  const segs = []; const re = /\[([^\]]+)\]([^\[]*)/g; let m;
+  const pre = l.split('[')[0]; if (pre) segs.push(['', pre]);
+  while ((m = re.exec(l))) segs.push([m[1], m[2]]);
+  const rep = li === 7 ? '<span style="color:#9AA6BF;font-size:13px;align-self:flex-end;margin-right:8px;padding-bottom:4px">(פעמיים)</span>' : '';
+  return '<div class="cl">' + segs.map(([c, w]) => `<div class="seg2" style="margin-left:${w.endsWith(' ')?6:0}px"><div class="c">${c}</div><div class="w">${w.trimEnd()}</div></div>`).join('') + rep + '</div>';
+}).join('')).join('');
+</script>
+</body>
+</html>

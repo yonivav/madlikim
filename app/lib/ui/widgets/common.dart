@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -30,9 +31,161 @@ String greeting(DateTime utc, Place place) {
   return 'לילה טוב';
 }
 
+/// Hebrew letter for nights 1..8 with a geresh: א׳ … ח׳.
+String nightLetter(int night) => '${'אבגדהוזח'[night - 1]}׳';
+
 Future<void> shareText(String text) =>
     SharePlus.instance.share(ShareParams(text: text));
 
+/// The primary action: a brass bar that glows a little.
+class BrassButton extends StatelessWidget {
+  const BrassButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.height = 58,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData? icon;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: enabled ? 1 : .55,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: enabled
+                ? const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [AppColors.brassHi, AppColors.brass],
+                  )
+                : null,
+            color: enabled ? null : AppColors.glass,
+            boxShadow: enabled
+                ? const [
+                    BoxShadow(
+                        color: Color(0x47D9A441),
+                        blurRadius: 30,
+                        offset: Offset(0, 10)),
+                  ]
+                : null,
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(18),
+              onTap: enabled
+                  ? () {
+                      HapticFeedback.lightImpact();
+                      onPressed!();
+                    }
+                  : null,
+              child: SizedBox(
+                height: height,
+                width: double.infinity,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon,
+                          size: 20,
+                          color: enabled ? AppColors.ink : AppColors.mist),
+                      const SizedBox(width: 8),
+                    ],
+                    Flexible(
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: AppText.sans,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
+                          color: enabled ? AppColors.ink : AppColors.mist,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A plain row with a hairline above it. Lists on this app are rows, not a
+/// stack of identical cards.
+class HairlineRow extends StatelessWidget {
+  const HairlineRow({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.leading,
+    this.trailing,
+    this.onTap,
+    this.first = false,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget? leading;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  /// No line above the first row in a group.
+  final bool first;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          border: first
+              ? null
+              : const Border(top: BorderSide(color: AppColors.line)),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          children: [
+            if (leading != null) ...[leading!, const SizedBox(width: 14)],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppText.heading),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(subtitle!, style: AppText.small),
+                  ],
+                ],
+              ),
+            ),
+            if (trailing != null)
+              trailing!
+            else if (onTap != null)
+              const Icon(Icons.chevron_left, color: AppColors.mist),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A raised surface for things that need one (blessings, settings groups).
 class SectionCard extends StatelessWidget {
   const SectionCard({
     super.key,
@@ -49,17 +202,28 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: highlight
-          ? RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: AppColors.gold, width: 1.5),
-            )
-          : null,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(padding: padding, child: child),
+    return Material(
+      color: Colors.transparent,
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF16223D), Color(0xFF121C33)],
+          ),
+          border: Border.all(
+            color: highlight
+                ? AppColors.brass.withValues(alpha: .7)
+                : AppColors.brass.withValues(alpha: .14),
+            width: highlight ? 1.5 : 1,
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: onTap,
+          child: Padding(padding: padding, child: child),
+        ),
       ),
     );
   }
@@ -76,19 +240,43 @@ class GoldBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.gold.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.gold.withValues(alpha: 0.6)),
+        color: AppColors.brass.withValues(alpha: .12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.brass.withValues(alpha: .5)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.gold, size: 20),
+          Icon(icon, color: AppColors.brass, size: 20),
           const SizedBox(width: 10),
-          Expanded(
-            child: Text(text,
-                style: const TextStyle(color: AppColors.cream, height: 1.4)),
-          ),
+          Expanded(child: Text(text, style: AppText.body.copyWith(fontSize: 15))),
+        ],
+      ),
+    );
+  }
+}
+
+/// An earned thing (badge), in olive.
+class OlivePill extends StatelessWidget {
+  const OlivePill({super.key, required this.emoji, required this.text});
+  final String emoji;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 14, 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: AppColors.olive.withValues(alpha: .1),
+        border: Border.all(color: AppColors.olive.withValues(alpha: .5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji),
+          const SizedBox(width: 10),
+          Text(text, style: AppText.body.copyWith(fontSize: 15)),
         ],
       ),
     );
@@ -108,9 +296,12 @@ class UnreviewedMark extends StatelessWidget {
       return true;
     }());
     if (reviewed || !debug) return const SizedBox.shrink();
-    return const Tooltip(
-      message: 'התוכן עוד לא נבדק על ידי רב',
-      child: Icon(Icons.warning_amber_rounded, size: 16, color: Colors.orange),
+    return const Padding(
+      padding: EdgeInsetsDirectional.only(end: 12),
+      child: Tooltip(
+        message: 'התוכן עוד לא נבדק על ידי רב',
+        child: Icon(Icons.warning_amber_rounded, size: 18, color: AppColors.ember),
+      ),
     );
   }
 }

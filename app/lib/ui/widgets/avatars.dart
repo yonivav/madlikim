@@ -1,0 +1,127 @@
+import 'package:flutter/material.dart';
+
+import '../../social/social_models.dart';
+import '../theme.dart';
+
+const _tones = [
+  Color(0xFF3A4E7A),
+  Color(0xFF5A4A6E),
+  Color(0xFF4A6050),
+  Color(0xFF6E5A3E),
+  Color(0xFF3E5E6E),
+  Color(0xFF6A4452),
+];
+
+Color toneFor(String id) => _tones[id.hashCode.abs() % _tones.length];
+
+/// A round initial. When [lit], a small flame sits on top.
+class Avatar extends StatelessWidget {
+  const Avatar({super.key, required this.member, this.lit = false, this.size = 34});
+  final GroupMember member;
+  final bool lit;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final initial = member.name.isEmpty ? '?' : member.name.characters.first;
+    return SizedBox(
+      width: size,
+      height: size + 6,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.bottomCenter,
+        children: [
+          Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: toneFor(member.id),
+              border: Border.all(color: AppColors.sky, width: 2),
+            ),
+            alignment: Alignment.center,
+            child: Text(initial,
+                style: TextStyle(
+                    fontSize: size * .42,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.parch)),
+          ),
+          if (lit) const Positioned(top: 0, child: _TinyFlame()),
+        ],
+      ),
+    );
+  }
+}
+
+class _TinyFlame extends StatelessWidget {
+  const _TinyFlame();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 7,
+        height: 10,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.vertical(
+              top: Radius.circular(5), bottom: Radius.circular(3.5)),
+          gradient: RadialGradient(
+            center: Alignment(0, .4),
+            colors: [AppColors.flameCore, AppColors.flame, AppColors.ember],
+            stops: [0, .55, 1],
+          ),
+          boxShadow: [BoxShadow(color: AppColors.flame, blurRadius: 8)],
+        ),
+      );
+}
+
+/// Up to three avatars, lit ones first, plus a "+N".
+class AvatarStack extends StatelessWidget {
+  const AvatarStack({super.key, required this.members, required this.litIds});
+  final List<GroupMember> members;
+  final Set<String> litIds;
+
+  @override
+  Widget build(BuildContext context) {
+    if (members.isEmpty) return const SizedBox.shrink();
+    final sorted = [...members]
+      ..sort((a, b) => (litIds.contains(b.id) ? 1 : 0) - (litIds.contains(a.id) ? 1 : 0));
+    final shown = sorted.take(3).toList();
+    final rest = members.length - shown.length;
+    const overlap = 26.0;
+    final count = shown.length + (rest > 0 ? 1 : 0);
+    return SizedBox(
+      width: overlap * (count - 1) + 34,
+      height: 40,
+      child: Stack(
+        children: [
+          for (var i = 0; i < shown.length; i++)
+            PositionedDirectional(
+              end: i * overlap,
+              bottom: 0,
+              child: Avatar(member: shown[i], lit: litIds.contains(shown[i].id)),
+            ),
+          if (rest > 0)
+            PositionedDirectional(
+              end: shown.length * overlap,
+              bottom: 0,
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.sill,
+                  border: Border.all(color: AppColors.sky, width: 2),
+                ),
+                alignment: Alignment.center,
+                child: Text('+$rest',
+                    textDirection: TextDirection.ltr,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.mist)),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

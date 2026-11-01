@@ -47,6 +47,9 @@ void main() {
     required DateTime now,
     UserProfile? profile,
   }) async {
+    tester.view.physicalSize = const Size(1170, 2532);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     final store = LocalStore(prefs);
@@ -80,18 +83,18 @@ void main() {
       (tester) async {
     final (container, notifications) =
         await boot(tester, now: il(2026, 12, 7, 18), profile: profile);
-    expect(find.textContaining('ערב טוב, אבי'), findsOneWidget);
+    expect(find.textContaining('ערב טוב', findRichText: true), findsOneWidget);
     expect(find.text('מדליקים'), findsOneWidget);
     expect(notifications.scheduled, isNotEmpty);
 
     await tester.tap(find.text('מדליקים'));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('נר רביעי'), findsWidgets);
-    expect(find.text('הדלקתי! 🕯️'), findsOneWidget);
+    expect(find.text('הדלקתי'), findsOneWidget);
 
-    await tester.tap(find.text('הדלקתי! 🕯️'));
+    await tester.tap(find.text('הדלקתי'));
     await tester.pump(const Duration(seconds: 3));
-    expect(find.textContaining('+4 אור'), findsOneWidget);
+    expect(find.text('+4'), findsOneWidget);
     expect(container.read(litNightsProvider), {4});
 
   });

@@ -12,7 +12,8 @@ import '../widgets/menorah.dart';
 import 'celebration_screen.dart';
 import 'songs_screen.dart';
 
-/// Vision 28.6: dark, big text, the screen stays on.
+/// Vision 28.6: dark, big text, the screen stays on. Read with a match in
+/// one hand, so everything is large and in order.
 class LightingScreen extends ConsumerStatefulWidget {
   const LightingScreen({super.key, required this.night});
 
@@ -51,9 +52,12 @@ class _LightingScreenState extends ConsumerState<LightingScreen> {
         .read(appActionsProvider)
         .markLit(widget.night, withGuests: _withGuests, late: late);
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (_) => CelebrationScreen(
+    Navigator.of(context).pushReplacement(PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 500),
+      pageBuilder: (_, __, ___) => CelebrationScreen(
           night: widget.night, light: light, late: late, badgesBefore: before),
+      transitionsBuilder: (_, a, __, child) =>
+          FadeTransition(opacity: a, child: child),
     ));
   }
 
@@ -67,120 +71,185 @@ class _LightingScreenState extends ConsumerState<LightingScreen> {
     final lit = ref.watch(litNightsProvider).contains(night.number);
     final actions = ref.read(appActionsProvider);
     final placed = {for (var i = 0; i < night.number; i++) i};
+    final first = night.isFirst;
+    final steps = content.steps;
+    final count = night.number == 1 ? 'נר אחד' : '${night.number} נרות';
 
-    final orderKey = night.isFirst ? 'first' : 'weekday';
-    final order = ContentBook.fill(content.lightingOrder[orderKey] ?? '',
-        {'count': night.number == 1 ? 'נר אחד' : '${night.number} נרות'});
-
-    return Theme(
-      data: AppTheme.dark().copyWith(scaffoldBackgroundColor: AppColors.nightDeep),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(night.title),
-          actions: [UnreviewedMark(reviewed: content.reviewed)],
+    return Scaffold(
+      backgroundColor: AppColors.skyDeep,
+      appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'סגירה',
+          icon: const Icon(Icons.close, color: AppColors.mist),
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  children: [
-                    Center(
-                      child: Text(night.hebrewDateLabel,
-                          style: const TextStyle(color: AppColors.muted)),
-                    ),
-                    const SizedBox(height: 12),
-                    if (night.kind == NightKind.erevShabbat) ...[
-                      GoldBanner(content.lightingOrder['erevShabbat'] ?? ''),
-                      const SizedBox(height: 12),
-                    ],
-                    if (night.kind == NightKind.motzeiShabbat) ...[
-                      GoldBanner(content.lightingOrder['motzeiShabbat'] ?? '',
-                          icon: Icons.nightlight_round),
-                      const SizedBox(height: 12),
-                    ],
-                    Menorah(
-                      placed: placed,
-                      lit: lit ? placed : const {},
-                      shamashLit: true,
-                      orderLabels: lit ? const {} : Menorah.lightingOrder(night.number),
-                      height: 190,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(order,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16, height: 1.5)),
-                    const SizedBox(height: 4),
-                    Text(
-                      night.kind == NightKind.erevShabbat
-                          ? 'עדיף להדליק לפני ${hhmm(night.preferredUntil, place)}'
-                          : 'מדליקים מ-${hhmm(night.windowStart, place)}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: AppColors.muted),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Text('הברכות',
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w800)),
-                        ),
-                        const Text('תעתיק',
-                            style: TextStyle(color: AppColors.muted)),
-                        Switch(
-                          value: profile.showTransliteration,
-                          onChanged: (v) => ref
-                              .read(profileProvider.notifier)
-                              .save(profile.copyWith(showTransliteration: v)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    for (final b in content.blessingsForNight(night.number))
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _BlessingCard(
-                          blessing: b,
-                          nusach: profile.nusach,
-                          transliteration: profile.showTransliteration,
-                          expanded: _expanded.contains(b.id),
-                          onToggle: () => setState(() => _expanded.contains(b.id)
-                              ? _expanded.remove(b.id)
-                              : _expanded.add(b.id)),
-                        ),
-                      ),
-                    TextButton.icon(
-                      onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const SongsScreen())),
-                      icon: const Icon(Icons.music_note),
-                      label: const Text('אחרי ההדלקה: הנרות הללו, מעוז צור'),
-                    ),
-                    if (_showSafety) ...[
-                      const SizedBox(height: 8),
-                      Text(content.safety,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppColors.muted)),
-                    ],
-                  ],
+        title: Text(night.isLast ? 'וזאת חנוכה' : night.title),
+        actions: [UnreviewedMark(reviewed: content.reviewed)],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 24),
+              children: [
+                Center(child: Text(night.hebrewDateLabel, style: AppText.small)),
+                if (night.kind == NightKind.erevShabbat)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: GoldBanner(content.lightingOrder['erevShabbat'] ?? ''),
+                  ),
+                if (night.kind == NightKind.motzeiShabbat)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: GoldBanner(content.lightingOrder['motzeiShabbat'] ?? '',
+                        icon: Icons.nightlight_round),
+                  ),
+                const SizedBox(height: 8),
+                Menorah(
+                  placed: placed,
+                  lit: lit ? placed : const {},
+                  shamashLit: true,
+                  orderLabels:
+                      lit ? const {} : Menorah.lightingOrder(night.number),
+                  height: 200,
+                  glow: lit ? 1 : .5,
                 ),
-              ),
-              _BottomAction(
-                night: night,
-                lit: lit,
-                canMarkNow: actions.canMarkNow(night),
-                canMarkLate: actions.canMarkLate(night),
-                busy: _busy,
-                withGuests: _withGuests,
-                onGuests: (v) => setState(() => _withGuests = v),
-                onMark: _mark,
-                form: profile.addressForm,
-                startsAt: hhmm(night.windowStart, place),
-              ),
-            ],
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      _Step(
+                        n: 1,
+                        text: ContentBook.fill(
+                            (first ? steps['placeFirst'] : steps['place']) ?? '',
+                            {'count': count}),
+                        bold: count,
+                      ),
+                      _Step(
+                          n: 2,
+                          text: (first ? steps['blessFirst'] : steps['bless']) ?? ''),
+                      _Step(
+                          n: 3,
+                          text: (first ? steps['lightFirst'] : steps['light']) ?? ''),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+                  child: Text(
+                    night.kind == NightKind.erevShabbat
+                        ? 'עדיף להדליק לפני ${hhmm(night.preferredUntil, place)}'
+                        : 'מדליקים מ־${hhmm(night.windowStart, place)}',
+                    style: AppText.small,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                          child: Text('הברכות', style: AppText.title)),
+                      Text('תעתיק', style: AppText.small),
+                      const SizedBox(width: 6),
+                      Switch(
+                        value: profile.showTransliteration,
+                        onChanged: (v) => ref
+                            .read(profileProvider.notifier)
+                            .save(profile.copyWith(showTransliteration: v)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                for (final b in content.blessingsForNight(night.number))
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+                    child: _BlessingCard(
+                      blessing: b,
+                      nusach: profile.nusach,
+                      transliteration: profile.showTransliteration,
+                      expanded: _expanded.contains(b.id),
+                      onToggle: () => setState(() => _expanded.contains(b.id)
+                          ? _expanded.remove(b.id)
+                          : _expanded.add(b.id)),
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: HairlineRow(
+                    title: 'אחרי ההדלקה',
+                    subtitle: 'הנרות הללו, מעוז צור עם אקורדים',
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const SongsScreen())),
+                  ),
+                ),
+                if (_showSafety)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
+                    child: Text(content.safety,
+                        textAlign: TextAlign.center, style: AppText.small),
+                  ),
+              ],
+            ),
           ),
-        ),
+          _Dock(
+            lit: lit,
+            canMarkNow: actions.canMarkNow(night),
+            canMarkLate: actions.canMarkLate(night),
+            busy: _busy,
+            withGuests: _withGuests,
+            onGuests: (v) => setState(() => _withGuests = v),
+            onMark: _mark,
+            form: profile.addressForm,
+            startsAt: hhmm(night.windowStart, place),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One step of a real sequence, so it gets a number.
+class _Step extends StatelessWidget {
+  const _Step({required this.n, required this.text, this.bold});
+  final int n;
+  final String text;
+  final String? bold;
+
+  @override
+  Widget build(BuildContext context) {
+    final i = bold == null ? -1 : text.indexOf(bold!);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 22,
+            child: Text('$n',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontFamily: AppText.serif,
+                    fontSize: 19,
+                    height: 1.3,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.brass)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: i < 0
+                ? Text(text, style: AppText.body)
+                : Text.rich(TextSpan(style: AppText.body, children: [
+                    TextSpan(text: text.substring(0, i)),
+                    TextSpan(
+                        text: bold,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    TextSpan(text: text.substring(i + bold!.length)),
+                  ])),
+          ),
+        ],
       ),
     );
   }
@@ -204,7 +273,7 @@ class _BlessingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionCard(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -212,60 +281,66 @@ class _BlessingCard extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                margin: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.gold,
+                  color: AppColors.olive,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text('רק הערב',
                     style: TextStyle(
-                        color: AppColors.nightDeep,
+                        fontSize: 12,
+                        color: AppColors.ink,
                         fontWeight: FontWeight.w800)),
               ),
             ),
-          Text(
-            blessing.textFor(nusach),
-            style: const TextStyle(
-              fontFamily: AppTheme.blessingFont,
-              fontSize: 26,
-              height: 1.7,
-              color: AppColors.cream,
-            ),
-          ),
+          Text(blessing.textFor(nusach), style: AppText.prayer),
           if (transliteration) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Directionality(
               textDirection: TextDirection.ltr,
               child: Text(blessing.transliteration,
-                  style: const TextStyle(
-                      fontSize: 15, color: AppColors.silver, height: 1.4)),
+                  style: AppText.small.copyWith(fontSize: 15)),
             ),
           ],
-          TextButton(
-            onPressed: onToggle,
-            child: Text(expanded ? 'סגור' : 'מה זה אומר?'),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
+            alignment: Alignment.topCenter,
+            child: expanded
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(blessing.meaning,
+                            style: AppText.body.copyWith(color: AppColors.mist)),
+                        if (blessing.variantNote != null) ...[
+                          const SizedBox(height: 6),
+                          Text(blessing.variantNote!,
+                              style: AppText.small.copyWith(fontSize: 13)),
+                        ],
+                      ],
+                    ),
+                  )
+                : const SizedBox(width: double.infinity),
           ),
-          if (expanded) ...[
-            Text(blessing.meaning,
-                style: const TextStyle(color: AppColors.silver, height: 1.5)),
-            if (blessing.variantNote != null) ...[
-              const SizedBox(height: 6),
-              Text(blessing.variantNote!,
-                  style: const TextStyle(color: AppColors.muted, fontSize: 13)),
-            ],
-            const SizedBox(height: 10),
-          ],
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton(
+              onPressed: onToggle,
+              style: TextButton.styleFrom(padding: EdgeInsets.zero),
+              child: Text(expanded ? 'סגירה' : 'מה זה אומר?'),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _BottomAction extends StatelessWidget {
-  const _BottomAction({
-    required this.night,
+class _Dock extends StatelessWidget {
+  const _Dock({
     required this.lit,
     required this.canMarkNow,
     required this.canMarkLate,
@@ -277,7 +352,6 @@ class _BottomAction extends StatelessWidget {
     required this.startsAt,
   });
 
-  final HanukkahNight night;
   final bool lit;
   final bool canMarkNow;
   final bool canMarkLate;
@@ -292,17 +366,17 @@ class _BottomAction extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget button;
     if (lit) {
-      button = FilledButton(
-        onPressed: null,
-        child: Text(say(form,
+      button = BrassButton(
+        label: say(form,
             m: 'כבר הדלקת הערב 🕯️',
             f: 'כבר הדלקת הערב 🕯️',
-            p: 'כבר הדלקתם הערב 🕯️')),
+            p: 'כבר הדלקתם הערב 🕯️'),
+        onPressed: null,
       );
     } else if (canMarkNow) {
-      button = FilledButton(
+      button = BrassButton(
+        label: 'הדלקתי',
         onPressed: busy ? null : () => onMark(late: false),
-        child: const Text('הדלקתי! 🕯️', style: TextStyle(fontSize: 20)),
       );
     } else if (canMarkLate) {
       button = OutlinedButton(
@@ -310,28 +384,27 @@ class _BottomAction extends StatelessWidget {
         child: const Text('שכחתי לסמן, הדלקתי'),
       );
     } else {
-      button = FilledButton(
-        onPressed: null,
-        child: Text('עוד מוקדם, מדליקים מ-$startsAt'),
-      );
+      button = BrassButton(label: 'עוד מוקדם, מדליקים מ־$startsAt', onPressed: null);
     }
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      padding: EdgeInsets.fromLTRB(
+          20, 10, 20, 16 + MediaQuery.paddingOf(context).bottom),
       decoration: const BoxDecoration(
-        color: AppColors.night,
-        border: Border(top: BorderSide(color: AppColors.nightCard)),
+        color: AppColors.skyDeep,
+        border: Border(top: BorderSide(color: AppColors.line)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (!lit && (canMarkNow || canMarkLate))
-            SwitchListTile(
-              value: withGuests,
-              onChanged: onGuests,
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              title: const Text('הדלקנו עם אורחים 🏠'),
+            Row(
+              children: [
+                Expanded(
+                    child: Text('הדלקנו עם אורחים',
+                        style: AppText.small.copyWith(fontSize: 15))),
+                Switch(value: withGuests, onChanged: onGuests),
+              ],
             ),
           button,
         ],

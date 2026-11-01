@@ -8,6 +8,7 @@ import '../../models/user_profile.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/menorah.dart';
 
 /// Three screens, about 30 seconds (Vision, 28.2 to 28.4).
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -121,7 +122,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         height: 4,
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
-                          color: i <= _page ? AppColors.gold : AppColors.nightCard,
+                          color: i <= _page ? AppColors.brass : AppColors.glass,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -146,7 +147,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget _page0Title(String text) => Padding(
         padding: const EdgeInsets.only(bottom: 20),
         child: Text(text,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+            style: AppText.display),
       );
 
   Widget _namePage() {
@@ -154,9 +155,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 24),
-        const Text('🕎', style: TextStyle(fontSize: 56)),
+        const Menorah(shamashLit: true, height: 150, glow: .6),
         const SizedBox(height: 12),
-        _page0Title('נעים מאוד 👋\nאיך לקרוא לך?'),
+        _page0Title('נעים מאוד.\nאיך לקרוא לך?'),
         TextField(
           controller: _name,
           maxLength: 20,
@@ -166,7 +167,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 16),
-        const Text('איך לפנות אליך?', style: TextStyle(color: AppColors.muted)),
+        const Text('איך לפנות אליך?', style: TextStyle(color: AppColors.mist)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -184,9 +185,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ],
         ),
         const SizedBox(height: 40),
-        FilledButton(
+        BrassButton(
+          label: 'יאללה',
           onPressed: _name.text.trim().isEmpty ? null : _next,
-          child: const Text('יאללה'),
         ),
       ],
     );
@@ -199,7 +200,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         _page0Title('איפה מדליקים?'),
         const Text(
           'רק בשביל לדעת מתי שקיעה אצלך. המיקום לא יוצא מהטלפון.',
-          style: TextStyle(color: AppColors.muted),
+          style: TextStyle(color: AppColors.mist),
         ),
         const SizedBox(height: 16),
         OutlinedButton.icon(
@@ -228,7 +229,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ],
         ),
         const SizedBox(height: 32),
-        FilledButton(onPressed: _next, child: const Text('הבא')),
+        BrassButton(label: 'הבא', onPressed: _next),
       ],
     );
   }
@@ -248,7 +249,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             groupValue: _mode,
             onChanged: (v) => setState(() => _mode = v!),
             title: Text(label),
-            subtitle: Text(sub, style: const TextStyle(color: AppColors.muted)),
+            subtitle: Text(sub, style: const TextStyle(color: AppColors.mist)),
             contentPadding: EdgeInsets.zero,
           ),
         if (_mode == ReminderMode.fixed)
@@ -270,7 +271,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           contentPadding: EdgeInsets.zero,
         ),
         const Divider(height: 32),
-        const Text('נוסח הברכות', style: TextStyle(color: AppColors.muted)),
+        const Text('נוסח הברכות', style: TextStyle(color: AppColors.mist)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -288,7 +289,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        const Text('אצלנו בבית', style: TextStyle(color: AppColors.muted)),
+        const Text('אצלנו בבית', style: TextStyle(color: AppColors.mist)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -306,12 +307,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ),
         const SizedBox(height: 24),
         const Text('בשבת אנחנו שותקים. ככה צריך 🕯️',
-            style: TextStyle(color: AppColors.muted)),
+            style: TextStyle(color: AppColors.mist)),
         const SizedBox(height: 24),
-        FilledButton(
-          onPressed: _saving ? null : _finish,
-          child: const Text('סיימנו'),
-        ),
+        BrassButton(label: 'סיימנו', onPressed: _saving ? null : _finish),
       ],
     );
   }

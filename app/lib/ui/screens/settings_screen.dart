@@ -24,7 +24,7 @@ class SettingsScreen extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(0, 24, 0, 8),
           child: Text(text,
               style: const TextStyle(
-                  color: AppColors.gold, fontWeight: FontWeight.w800)),
+                  color: AppColors.brass, fontWeight: FontWeight.w800)),
         );
 
     return Scaffold(
@@ -64,14 +64,14 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () async {
               final place = await showModalBottomSheet<Place>(
                 context: context,
-                backgroundColor: AppColors.night,
+                backgroundColor: AppColors.sky,
                 builder: (sheet) => ListView(
                   children: [
                     for (final c in Cities.all)
                       ListTile(
                         title: Text(c.name),
                         trailing: c.id == profile.place.id
-                            ? const Icon(Icons.check, color: AppColors.gold)
+                            ? const Icon(Icons.check, color: AppColors.brass)
                             : null,
                         onTap: () => Navigator.pop(sheet, c),
                       ),
@@ -139,7 +139,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Text(
             'בערב שבת התזכורת מגיעה לפי כניסת שבת, ובשבת עצמה אין התראות בכלל.',
-            style: TextStyle(color: AppColors.muted, fontSize: 13),
+            style: TextStyle(color: AppColors.mist, fontSize: 13),
           ),
           const SizedBox(height: 8),
           OutlinedButton.icon(
