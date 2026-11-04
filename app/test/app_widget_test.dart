@@ -91,11 +91,13 @@ void main() {
 
     await tester.tap(find.text('מדליקים'));
     await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
     expect(find.text('נר רביעי'), findsWidgets);
     expect(find.text('הדלקתי'), findsOneWidget);
 
     await tester.tap(find.text('הדלקתי'));
     await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(); // let the new route come onstage (HeroController)
     expect(find.byType(LightingShow), findsOneWidget);
     // The show runs ~6.5s for four candles; then the panel slides in.
     await tester.pump(const Duration(seconds: 8));

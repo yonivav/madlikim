@@ -125,14 +125,16 @@ class GroupsScreen extends ConsumerWidget {
       builder: (_) => const _CreateGroupSheet(),
     );
     if (result == null) return;
-    final profile = ref.read(profileProvider)!;
+    if (!context.mounted) return;
+    final myName = await ensureDisplayName(context, ref);
+    if (myName == null) return;
     final season = ref.read(seasonProvider);
     try {
       final g = await ref.read(socialProvider).createGroup(
             name: result.$1,
             emoji: result.$2,
             hebrewYear: season.hebrewYear,
-            myName: profile.displayName,
+            myName: myName,
           );
       await ref.read(localStoreProvider).logEvent('group_created');
       // Count lightings already done this year.
@@ -298,13 +300,14 @@ class GroupScreen extends ConsumerWidget {
                                   style: TextStyle(color: AppColors.muted))
                               : TextButton(
                                   onPressed: () async {
+                                    final myName =
+                                        await ensureDisplayName(context, ref);
+                                    if (myName == null) return;
                                     await social.sendNudge(
                                       groupId: g.id,
                                       toUserId: m.id,
                                       night: night,
-                                      myName: ref
-                                          .read(profileProvider)!
-                                          .displayName,
+                                      myName: myName,
                                     );
                                     await ref
                                         .read(localStoreProvider)
@@ -383,15 +386,16 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   }
 
   Future<void> _join() async {
+    final myName = await ensureDisplayName(context, ref);
+    if (myName == null) return;
     setState(() {
       _busy = true;
       _error = null;
     });
-    final profile = ref.read(profileProvider)!;
     try {
       final g = await ref
           .read(socialProvider)
-          .joinByCode(_code.text, myName: profile.displayName);
+          .joinByCode(_code.text, myName: myName);
       if (g == null) {
         setState(() => _error = 'לא מצאנו חנוכייה כזו. אולי הקוד השתבש?');
         return;

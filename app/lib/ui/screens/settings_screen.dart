@@ -5,7 +5,6 @@ import '../../core/place.dart';
 import '../../models/user_profile.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
-import '../widgets/common.dart';
 import '../widgets/my_neri.dart';
 import '../widgets/neri.dart';
 
@@ -69,7 +68,9 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('שם'),
-            subtitle: Text(profile.displayName),
+            subtitle: Text(profile.displayName.isEmpty
+                ? 'לא הוגדר, נדרש כדי לשתף'
+                : profile.displayName),
             trailing: const Icon(Icons.edit_outlined),
             onTap: () async {
               final name = await _askText(context, 'איך לקרוא לך?',

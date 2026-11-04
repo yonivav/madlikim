@@ -153,7 +153,9 @@ class HomeScreen extends ConsumerWidget {
     }
 
     final subtitle = score.nightsLit == 0
-        ? '${greeting(now, place)}, ${profile.displayName}'
+        ? (profile.displayName.isEmpty
+            ? greeting(now, place)
+            : '${greeting(now, place)}, ${profile.displayName}')
         : '${score.nightsLit} מתוך 8 לילות, ${score.light} אור';
     // The light starts as a glow at the bottom and rises with every night.
     final level = .14 + .86 * score.nightsLit / 8;
