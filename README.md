@@ -25,6 +25,9 @@ flutter run
 - [Vision](docs/VISION.md): המסמך שממנו נבנית האפליקציה. חלק א: למה ומה. חלק ב: מפרט מסך אחר מסך
 - [Development](docs/DEVELOPMENT.md): הרצה, מבנה, בדיקות
 - [Firebase](docs/FIREBASE.md): חיבור השכבה החברתית
+- [חנויות](docs/STORE.md): שם, תיאורים, מילות מפתח, טפסי פרטיות, הערות לבודקי אפל, צ'קליסט הגשה
+- [חבילת בדיקה](docs/review/): `rabbi.pdf` לרב ו-`musician.pdf` לנגן. נוצרות מקבצי התוכן: `python3 app/tool/review_packet.py && node app/tool/review_pdf.js`
+- [עיצוב](docs/design/): אב טיפוס, אייקון, צילומי מסך
 
 ## מבנה הריפו
 
@@ -34,10 +37,14 @@ app/        אפליקציית Flutter (iOS + Android)
   assets/   תוכן לבדיקת רב (content/) וגופנים
   test/     טסטים
   tool/     סקריפט הקמה
-web/        דף נחיתה לקישורי הזמנה
+web/        דף נחיתה לקישורי הזמנה ומדיניות פרטיות (web/privacy)
 docs/       Vision ומסמכים
 firestore.rules, firestore.indexes.json, firebase.json
 ```
+
+## בדיקות אוטומטיות
+
+כל push לגיטהאב מריץ את `.github/workflows/ci.yml`: הקמת הפרויקט, `flutter analyze`, `flutter test`, ובניית APK לאנדרואיד (להורדה מלשונית Actions). בניית iOS: Actions → CI → Run workflow → לסמן iOS.
 
 ## סטאק
 

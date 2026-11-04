@@ -155,6 +155,11 @@ class _Tonight extends ConsumerWidget {
                   f: 'יש לך נרות בבית? זה הזמן לקנות.',
                   p: 'יש נרות בבית? זה הזמן לקנות.'));
         }
+        // Lets people (and store reviewers) see the lighting flow early.
+        action = OutlinedButton(
+          onPressed: () => _openLighting(context, ref, snap.season.first),
+          child: const Text('להתכונן: הברכות וסדר ההדלקה'),
+        );
       case AppPhase.eveOfHanukkah:
         final first = snap.season.first;
         mark = 'מחר';

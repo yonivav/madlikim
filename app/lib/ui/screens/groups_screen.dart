@@ -6,6 +6,7 @@ import '../../logic/scoring.dart';
 import '../../social/social_models.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
+import '../widgets/avatars.dart';
 import '../widgets/common.dart';
 
 /// The night the social screens talk about: tonight, or the latest one that
@@ -267,13 +268,8 @@ class GroupScreen extends ConsumerWidget {
               Center(
                 child: Column(
                   children: [
-                    Text('${g.totalLight}',
-                        style: const TextStyle(
-                            fontSize: 64,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.brass)),
-                    const Text('אור ביחד ✨',
-                        style: TextStyle(color: AppColors.mist)),
+                    Text('${g.totalLight}', style: AppText.numeral),
+                    Text('אור ביחד', style: AppText.small),
                   ],
                 ),
               ),
@@ -285,19 +281,16 @@ class GroupScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
               ],
               Text('נר ${ordinalsMasculine[night]}: $litCount מתוך ${g.members.length} הדליקו',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w800)),
+                  style: AppText.heading),
               const SizedBox(height: 8),
               for (final m in g.members)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: AppColors.glass,
-                    child: Text(m.name.isEmpty ? '?' : m.name.characters.first),
-                  ),
+                  leading: Avatar(
+                      member: m, lit: data.litMemberIds.contains(m.id), size: 38),
                   title: Text(m.id == me ? '${m.name} (אני)' : m.name),
                   trailing: data.litMemberIds.contains(m.id)
-                      ? const Text('🕯️', style: TextStyle(fontSize: 22))
+                      ? const Icon(Icons.check_circle, color: AppColors.olive)
                       : (m.id == me || isShabbat)
                           ? null
                           : data.nudgedByMe.contains(m.id)
@@ -336,10 +329,10 @@ class GroupScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              FilledButton.icon(
+              BrassButton(
+                label: 'להזמין עוד',
+                icon: Icons.ios_share,
                 onPressed: () => shareGroup(ref, g),
-                icon: const Icon(Icons.share),
-                label: const Text('להזמין עוד'),
               ),
             ],
           ),

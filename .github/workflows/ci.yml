@@ -1,0 +1,69 @@
+name: CI
+
+# Every push and pull request: generate the platform folders, analyze, test,
+# and build an Android debug APK. iOS build runs on demand (macOS minutes
+# are expensive): Actions tab → CI → Run workflow.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      ios:
+        description: "Also build iOS (no codesign)"
+        type: boolean
+        default: false
+
+jobs:
+  analyze-test-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up project (flutter create + patches + pub get)
+        run: bash app/tool/setup.sh
+
+      - name: Analyze
+        working-directory: app
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        working-directory: app
+        run: flutter test
+
+      - name: Build Android (debug)
+        working-directory: app
+        run: flutter build apk --debug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: madlikim-debug-apk
+          path: app/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
+
+  ios:
+    if: github.event_name == 'workflow_dispatch' && inputs.ios
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Set up project
+        run: bash app/tool/setup.sh
+      - name: Build iOS (no codesign)
+        working-directory: app
+        run: flutter build ios --debug --no-codesign

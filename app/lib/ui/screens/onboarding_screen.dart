@@ -239,19 +239,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         _page0Title('מתי להזכיר?'),
-        for (final (mode, label, sub) in [
-          (ReminderMode.sunset, 'בשקיעה', 'הכי מקובל'),
-          (ReminderMode.tzeit, 'בצאת הכוכבים', 'כחצי שעה אחרי השקיעה'),
-          (ReminderMode.fixed, 'בשעה קבועה', 'למשל כשחוזרים הביתה'),
-        ])
-          RadioListTile<ReminderMode>(
-            value: mode,
-            groupValue: _mode,
-            onChanged: (v) => setState(() => _mode = v!),
-            title: Text(label),
-            subtitle: Text(sub, style: const TextStyle(color: AppColors.mist)),
-            contentPadding: EdgeInsets.zero,
+        RadioGroup<ReminderMode>(
+          groupValue: _mode,
+          onChanged: (v) => setState(() => _mode = v ?? _mode),
+          child: Column(
+            children: [
+              for (final (mode, label, sub) in [
+                (ReminderMode.sunset, 'בשקיעה', 'הכי מקובל'),
+                (ReminderMode.tzeit, 'בצאת הכוכבים', 'כחצי שעה אחרי השקיעה'),
+                (ReminderMode.fixed, 'בשעה קבועה', 'למשל כשחוזרים הביתה'),
+              ])
+                RadioListTile<ReminderMode>(
+                  value: mode,
+                  title: Text(label),
+                  subtitle: Text(sub, style: AppText.small),
+                  contentPadding: EdgeInsets.zero,
+                ),
+            ],
           ),
+        ),
         if (_mode == ReminderMode.fixed)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),

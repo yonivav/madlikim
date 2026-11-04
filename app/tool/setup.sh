@@ -27,6 +27,10 @@ python3 tool/patch_platforms.py
 echo "==> Getting packages"
 flutter pub get
 
+echo "==> App icon and splash screen"
+dart run flutter_launcher_icons
+dart run flutter_native_splash:create
+
 echo
 echo "Done. Next:"
 echo "  flutter test        # run the tests"
