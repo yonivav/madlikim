@@ -8,7 +8,8 @@ import '../../models/user_profile.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
-import '../widgets/menorah.dart';
+import '../widgets/neri.dart';
+import '../widgets/scene.dart';
 
 /// Three screens, about 30 seconds (Vision, 28.2 to 28.4).
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -122,7 +123,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         height: 4,
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
-                          color: i <= _page ? AppColors.brass : AppColors.glass,
+                          color: i <= _page ? AppColors.orange : AppColors.paper2,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -154,10 +155,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        const SizedBox(height: 24),
-        const Menorah(shamashLit: true, height: 150, glow: .6),
+        const SizedBox(height: 8),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 40),
+          child: SpeechBubble('היי! אני נרי 👋'),
+        ),
+        SizedBox(
+          height: 230,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: const [
+              Positioned(right: 0, bottom: 0, child: OliveBranch(size: 100)),
+              Neri(size: 140, arms: NeriArms.wave, semanticLabel: 'נרי מנופף לשלום'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text('אני אזכיר לך להדליק כל ערב בחנוכה, ונדליק ביחד.',
+            textAlign: TextAlign.center, style: AppText.small.copyWith(fontSize: 15)),
+        const SizedBox(height: 16),
         const SizedBox(height: 12),
-        _page0Title('נעים מאוד.\nאיך לקרוא לך?'),
+        _page0Title('איך לקרוא לך?'),
         TextField(
           controller: _name,
           maxLength: 20,
@@ -167,7 +185,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 16),
-        const Text('איך לפנות אליך?', style: TextStyle(color: AppColors.mist)),
+        const Text('איך לפנות אליך?', style: TextStyle(color: AppColors.muted)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -197,10 +215,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
+        const Center(child: Neri(size: 90, mood: NeriMood.calm, animate: false)),
         _page0Title('איפה מדליקים?'),
         const Text(
           'רק בשביל לדעת מתי שקיעה אצלך. המיקום לא יוצא מהטלפון.',
-          style: TextStyle(color: AppColors.mist),
+          style: TextStyle(color: AppColors.muted),
         ),
         const SizedBox(height: 16),
         OutlinedButton.icon(
@@ -238,6 +257,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
+        const Center(child: Neri(size: 90, arms: NeriArms.up, animate: false)),
         _page0Title('מתי להזכיר?'),
         RadioGroup<ReminderMode>(
           groupValue: _mode,
@@ -277,7 +297,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           contentPadding: EdgeInsets.zero,
         ),
         const Divider(height: 32),
-        const Text('נוסח הברכות', style: TextStyle(color: AppColors.mist)),
+        const Text('נוסח הברכות', style: TextStyle(color: AppColors.muted)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -295,7 +315,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        const Text('אצלנו בבית', style: TextStyle(color: AppColors.mist)),
+        const Text('אצלנו בבית', style: TextStyle(color: AppColors.muted)),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -313,7 +333,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ),
         const SizedBox(height: 24),
         const Text('בשבת אנחנו שותקים. ככה צריך 🕯️',
-            style: TextStyle(color: AppColors.mist)),
+            style: TextStyle(color: AppColors.muted)),
         const SizedBox(height: 24),
         BrassButton(label: 'סיימנו', onPressed: _saving ? null : _finish),
       ],

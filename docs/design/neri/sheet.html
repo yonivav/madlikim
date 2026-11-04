@@ -1,0 +1,15 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face { font-family: Fredoka; src: url(../../../app/assets/fonts/Fredoka.ttf); font-weight: 300 700; }
+body{margin:0;background:#F6F0E3;font-family:Fredoka}
+.g{display:flex;flex-wrap:wrap;gap:10px;padding:20px}
+.c{width:200px;height:300px;text-align:center}
+.c div{height:260px}
+.small{display:flex;gap:6px;padding:0 20px 20px}
+.small div{width:80px;height:120px}
+</style><script src="neri.js"></script></head><body>
+<div class="g" id="g"></div><div class="small" id="s"></div>
+<script>
+const v=[['happy',{}],['excited',{arms:'up'}],['wave',{arms:'wave'}],['lit happy',{lit:true,mood:'happy',arms:'up'}],['sleep',{mood:'sleep',sleepyZ:true}],['calm',{mood:'calm'}],['wink lit',{mood:'wink',lit:true,arms:'point'}]];
+document.getElementById('g').innerHTML=v.map(([n,o])=>'<div class="c"><div>'+neri(Object.assign({mood:n.split(' ')[0]==='wave'?'happy':n.split(' ')[0]},o))+'</div>'+n+'</div>').join('');
+document.getElementById('s').innerHTML=NIGHT_COLORS.map((c,i)=>'<div>'+neri({color:c,mood:i<4?'happy':'sleep',lit:i<4})+'</div>').join('');
+</script></body></html>

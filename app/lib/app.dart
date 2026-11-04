@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'links/deep_links.dart';
 import 'state/providers.dart';
 import 'ui/screens/groups_screen.dart';
-import 'ui/screens/home_screen.dart';
+import 'ui/screens/shell.dart';
 import 'ui/screens/invite_screens.dart';
 import 'ui/screens/lighting_screen.dart';
 import 'ui/screens/my_menorah_screen.dart';
@@ -29,7 +29,7 @@ class MadlikimApp extends StatelessWidget {
       title: 'מדליקים',
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
-      theme: AppTheme.dark(),
+      theme: AppTheme.light(),
       locale: const Locale('he'),
       supportedLocales: const [Locale('he'), Locale('en')],
       localizationsDelegates: const [
@@ -154,6 +154,6 @@ class _RootGateState extends ConsumerState<RootGate> {
       }
     });
     final profile = ref.watch(profileProvider);
-    return profile == null ? const OnboardingScreen() : const HomeScreen();
+    return profile == null ? const OnboardingScreen() : const Shell();
   }
 }

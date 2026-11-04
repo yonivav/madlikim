@@ -91,6 +91,33 @@ class HebrewCalendar {
   static DateTime gregorianFromHebrew(int year, int month, int day) =>
       dateFromFixed(fixedFromHebrew(year, month, day));
 
+  /// Fixed day number of a civil date.
+  static int fixedFromDate(DateTime date) =>
+      DateTime.utc(date.year, date.month, date.day).difference(_fixedOne).inDays + 1;
+
+  /// Hebrew date of a civil date (the daytime part of that day).
+  static ({int year, int month, int day}) hebrewFromDate(DateTime date) {
+    final fixed = fixedFromDate(date);
+    var year = ((fixed - _epoch) / 365.2468).floor() + 1;
+    while (newYear(year + 1) <= fixed) {
+      year++;
+    }
+    while (newYear(year) > fixed) {
+      year--;
+    }
+    final months = [
+      for (var m = HebrewMonth.tishri; m <= lastMonthOfYear(year); m++) m,
+      for (var m = 1; m < HebrewMonth.tishri; m++) m,
+    ];
+    for (final m in months) {
+      final start = fixedFromHebrew(year, m, 1);
+      if (fixed >= start && fixed < start + daysInMonth(m, year)) {
+        return (year: year, month: m, day: fixed - start + 1);
+      }
+    }
+    return (year: year, month: HebrewMonth.tishri, day: 1);
+  }
+
   /// The Hebrew year whose Hanukkah falls in December of [gregorianYear]
   /// (or very late November).
   static int hebrewYearForHanukkahIn(int gregorianYear) => gregorianYear + 3761;

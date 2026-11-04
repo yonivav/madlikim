@@ -6,10 +6,11 @@ import '../../logic/scoring.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
-import '../widgets/menorah.dart';
+import '../widgets/neri.dart';
+import '../widgets/scene.dart';
 import 'lighting_screen.dart';
 
-/// Vision 28.8: eight nights, light, streak, badges.
+/// Vision 28.8, as "Neri's gang": every lit night wakes up a buddy.
 class MyMenorahScreen extends ConsumerWidget {
   const MyMenorahScreen({super.key});
 
@@ -19,53 +20,127 @@ class MyMenorahScreen extends ConsumerWidget {
     final lit = ref.watch(litNightsProvider);
     final score = ref.watch(scoreProvider);
     final now = ref.watch(nowProvider).valueOrNull ?? DateTime.now().toUtc();
-    final positions = {for (final n in lit) n - 1};
+    final tonight = ref.watch(phaseProvider).night?.number;
+    final buddy = (MediaQuery.sizeOf(context).width - 72) / 8;
+
+    NeriMood moodFor(HanukkahNight n) {
+      if (lit.contains(n.number)) return NeriMood.happy;
+      if (n.number == tonight) return NeriMood.excited;
+      if (n.hasStarted(now)) return NeriMood.calm; // missed: no judgment
+      return NeriMood.sleep;
+    }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('החנוכייה שלי')),
+      appBar: AppBar(title: const Text('החבר\'ה של נרי')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+        padding: const EdgeInsets.fromLTRB(18, 0, 18, 24),
         children: [
-          Menorah(
-            placed: positions,
-            lit: positions,
-            shamashLit: positions.isNotEmpty,
-            height: 220,
+          Center(child: Text('כל לילה שמדליקים, מתעורר חבר חדש', style: AppText.small)),
+          const SizedBox(height: 14),
+          Container(
+            height: buddy * 1.5 + 70,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.ink, width: 2),
+              boxShadow: Ink2.shadow(3, 4),
+            ),
+            child: NightBackdrop(
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 10,
+                    right: 10,
+                    bottom: 22,
+                    height: 12,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD9A441),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppColors.ink, width: 2),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 12,
+                    right: 12,
+                    bottom: 32,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        for (final n in season.nights)
+                          Neri(
+                            size: buddy,
+                            color: NeriColor.forNight(n.number),
+                            mood: moodFor(n),
+                            lit: lit.contains(n.number),
+                            glow: .55,
+                            animate: n.number == tonight,
+                            semanticLabel: '${n.title}: ${lit.contains(n.number) ? 'דולק' : 'עוד לא'}',
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Row(
             children: [
               _Stat(value: '${score.light}', label: 'אור'),
-              _Stat(value: '${score.nightsLit}', label: 'מתוך 8 לילות'),
-              _Stat(value: '${score.currentStreak}', label: 'ברצף'),
+              const SizedBox(width: 10),
+              _Stat(value: '${score.nightsLit}/8', label: 'לילות'),
+              const SizedBox(width: 10),
+              _Stat(value: '🔥 ${score.currentStreak}', label: 'ברצף'),
             ],
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 20),
           const Text('הלילות', style: AppText.title),
           const SizedBox(height: 4),
           for (final night in season.nights)
-            _NightRow(
+            HairlineRow(
               first: night.number == 1,
-              number: night.number,
+              leading: Neri(
+                size: 26,
+                color: NeriColor.forNight(night.number),
+                mood: moodFor(night),
+                lit: lit.contains(night.number),
+                glow: .4,
+                animate: false,
+              ),
               title: night.title,
-              date: '${night.hebrewDateLabel}, ${night.day}.${night.month}',
-              lit: lit.contains(night.number),
-              open: night.hasStarted(now) && !lit.contains(night.number),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => LightingScreen(night: night))),
+              subtitle: '${night.hebrewDateLabel}, ${night.day}.${night.month}',
+              trailing: lit.contains(night.number)
+                  ? const Icon(Icons.check_circle, color: AppColors.olive)
+                  : night.hasStarted(now)
+                      ? const Icon(Icons.chevron_left, color: AppColors.muted)
+                      : const SizedBox.shrink(),
+              onTap: night.hasStarted(now) && !lit.contains(night.number)
+                  ? () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => LightingScreen(night: night)))
+                  : null,
             ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 20),
           const Text('תגים', style: AppText.title),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 10,
             children: [
               for (final b in Achievement.values)
-                _BadgeChip(info: badgeInfo[b]!, earned: score.badges.contains(b)),
+                Tooltip(
+                  message: badgeInfo[b]!.howTo,
+                  triggerMode: TooltipTriggerMode.tap,
+                  child: OlivePill(
+                    emoji: badgeInfo[b]!.emoji,
+                    text: badgeInfo[b]!.title,
+                    earned: score.badges.contains(b),
+                  ),
+                ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Text(
             'לבד אפשר להגיע ל־${HanukkahSeason.maxLight} אור (1+2+…+8). '
             'אורחים וחברים שמצטרפים מוסיפים עוד.',
@@ -84,91 +159,22 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-        child: Column(
-          children: [
-            Text(value,
-                style: AppText.numeral.copyWith(fontSize: 44, height: 1.1)),
-            Text(label, style: AppText.small),
-          ],
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.ink, width: 2),
+            boxShadow: Ink2.shadow(2, 3),
+          ),
+          child: Column(
+            children: [
+              Text(value,
+                  textDirection: TextDirection.ltr,
+                  style: AppText.numeral.copyWith(fontSize: 26)),
+              Text(label, style: AppText.small),
+            ],
+          ),
         ),
       );
-}
-
-class _NightRow extends StatelessWidget {
-  const _NightRow({
-    required this.first,
-    required this.number,
-    required this.title,
-    required this.date,
-    required this.lit,
-    required this.open,
-    required this.onTap,
-  });
-
-  final bool first;
-  final int number;
-  final String title;
-  final String date;
-  final bool lit;
-  final bool open;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return HairlineRow(
-      first: first,
-      leading: SizedBox(
-        width: 34,
-        child: Text(nightLetter(number),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontFamily: AppText.serif,
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                color: lit ? AppColors.brass : AppColors.sill)),
-      ),
-      title: title,
-      subtitle: date,
-      trailing: lit
-          ? const Icon(Icons.check_circle, color: AppColors.olive)
-          : open
-              ? const Icon(Icons.chevron_left, color: AppColors.mist)
-              : const SizedBox.shrink(),
-      onTap: open ? onTap : null,
-    );
-  }
-}
-
-class _BadgeChip extends StatelessWidget {
-  const _BadgeChip({required this.info, required this.earned});
-  final BadgeInfo info;
-  final bool earned;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: info.howTo,
-      triggerMode: TooltipTriggerMode.tap,
-      child: earned
-          ? OlivePill(emoji: info.emoji, text: info.title)
-          : Opacity(
-              opacity: .45,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 8, 14, 8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: const Color(0x38F3E9D7)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(info.emoji),
-                    const SizedBox(width: 10),
-                    Text(info.title, style: AppText.body.copyWith(fontSize: 15)),
-                  ],
-                ),
-              ),
-            ),
-    );
-  }
 }

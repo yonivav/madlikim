@@ -54,18 +54,18 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icon/icon.png"
   remove_alpha_ios: true
-  background_color_ios: "#101B33"
-  adaptive_icon_background: "#101B33"
+  background_color_ios: "#2F45B8"
+  adaptive_icon_background: "#2F45B8"
   adaptive_icon_foreground: "assets/icon/foreground.png"
   adaptive_icon_monochrome: "assets/icon/monochrome.png"
   min_sdk_android: 23
 
 # dart run flutter_native_splash:create  (setup.sh runs it)
 flutter_native_splash:
-  color: "#0A1226"
+  color: "#F6F0E3"
   image: "assets/icon/splash.png"
   android_12:
-    color: "#0A1226"
+    color: "#F6F0E3"
     image: "assets/icon/splash_android12.png"
   fullscreen: false
 
@@ -79,6 +79,9 @@ flutter:
     - family: FrankRuhlLibre
       fonts:
         - asset: assets/fonts/FrankRuhlLibre.ttf
-    - family: Heebo
+    - family: Fredoka
       fonts:
-        - asset: assets/fonts/Heebo.ttf
+        - asset: assets/fonts/Fredoka.ttf
+    - family: Rubik
+      fonts:
+        - asset: assets/fonts/Rubik.ttf

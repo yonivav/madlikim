@@ -59,7 +59,7 @@ class GroupsScreen extends ConsumerWidget {
             loading: () => [const Center(child: CircularProgressIndicator())],
             error: (e, _) => [
               const Text('אין חיבור, נעדכן את החבר\'ה אחר כך.',
-                  style: TextStyle(color: AppColors.mist)),
+                  style: TextStyle(color: AppColors.muted)),
             ],
             data: (list) => [
               if (list.isEmpty)
@@ -68,7 +68,7 @@ class GroupsScreen extends ConsumerWidget {
                   child: Text(
                     'עוד אין חנוכיות משותפות.\nפותחים אחת ושולחים קישור בוואטסאפ למשפחה או לחבר\'ה.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.mist, height: 1.5),
+                    style: TextStyle(color: AppColors.muted, height: 1.5),
                   ),
                 ),
               for (final g in list) ...[
@@ -87,7 +87,7 @@ class GroupsScreen extends ConsumerWidget {
                                 style: const TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.w700)),
                             Text('${g.members.length} חברים · ${g.totalLight} אור',
-                                style: const TextStyle(color: AppColors.mist)),
+                                style: const TextStyle(color: AppColors.muted)),
                           ],
                         ),
                       ),
@@ -121,7 +121,7 @@ class GroupsScreen extends ConsumerWidget {
     final result = await showModalBottomSheet<(String, String)>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.sky,
+      backgroundColor: AppColors.paper,
       builder: (_) => const _CreateGroupSheet(),
     );
     if (result == null) return;
@@ -295,7 +295,7 @@ class GroupScreen extends ConsumerWidget {
                           ? null
                           : data.nudgedByMe.contains(m.id)
                               ? const Text('נשלח ✓',
-                                  style: TextStyle(color: AppColors.mist))
+                                  style: TextStyle(color: AppColors.muted))
                               : TextButton(
                                   onPressed: () async {
                                     await social.sendNudge(
@@ -319,7 +319,7 @@ class GroupScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('קוד להצטרפות',
-                        style: TextStyle(color: AppColors.mist)),
+                        style: TextStyle(color: AppColors.muted)),
                     SelectableText(g.inviteCode,
                         style: const TextStyle(
                             fontSize: 32,
@@ -427,7 +427,7 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           const Text('הקוד שקיבלת (6 תווים)',
-              style: TextStyle(color: AppColors.mist)),
+              style: TextStyle(color: AppColors.muted)),
           const SizedBox(height: 8),
           TextField(
             controller: _code,

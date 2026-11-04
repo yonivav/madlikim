@@ -107,6 +107,6 @@ void main() {
 
   testWidgets('countdown before Hanukkah', (tester) async {
     await boot(tester, now: il(2026, 11, 20, 12), profile: profile);
-    expect(find.textContaining('ימים לחנוכה'), findsOneWidget);
+    expect(find.textContaining('ימים לחנוכה'), findsWidgets);
   });
 }

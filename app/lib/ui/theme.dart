@@ -1,199 +1,197 @@
 import 'package:flutter/material.dart';
 
-/// "The window": a lit hanukkiah seen from a winter street (Vision, ch. 14).
-///
-/// Two warm accents on night blue: brass for the menorah and every primary
-/// action, olive (the oil of the miracle) for "done" and earned things.
+/// "Neri": warm paper, ink outlines with a hard offset shadow, an orange
+/// action color, Hanukkah blue, and golden light that rises night by night.
+/// Night screens (celebration, Shabbat) switch to deep blue.
 class AppColors {
-  static const sky = Color(0xFF101B33);
-  static const skyDeep = Color(0xFF0A1226);
-  static const glass = Color(0xFF1B2A4A);
-  static const glassHi = Color(0xFF24365C);
-  static const sill = Color(0xFF2A3A5E);
+  static const paper = Color(0xFFF6F0E3);
+  static const paper2 = Color(0xFFEDE3CD);
+  static const card = Color(0xFFFFFDF8);
+  static const ink = Color(0xFF1E2340);
+  static const muted = Color(0xFF7A7466);
+  static const line = Color(0x261E2340);
 
-  static const brass = Color(0xFFD9A441);
-  static const brassHi = Color(0xFFF2C66B);
-  static const brassLo = Color(0xFF9C6F22);
-  static const brassDeep = Color(0xFF8E621C);
+  static const orange = Color(0xFFF26B2A);
+  static const orangeHi = Color(0xFFFF8A4C);
+  static const blue = Color(0xFF3F74E6);
+  static const gold = Color(0xFFFFC63A);
+  static const goldSoft = Color(0xFFFFE7A6);
+  static const pink = Color(0xFFFF7FA3);
+  static const olive = Color(0xFF5E9C4A);
 
-  static const flame = Color(0xFFFFC861);
-  static const flameCore = Color(0xFFFFF6D6);
-  static const ember = Color(0xFFF07F3C);
-  static const olive = Color(0xFF9DAA6A);
+  static const flame = Color(0xFFFFC63A);
+  static const flameCore = Color(0xFFFFF7D1);
+  static const ember = Color(0xFFFF6A1F);
 
-  static const parch = Color(0xFFF3E9D7);
-  static const mist = Color(0xFF9AA6BF);
-  static const ink = Color(0xFF1A1206);
-  static const line = Color(0x1AF3E9D7);
-
-  static const wax = Color(0xFFFFF9EE);
-  static const waxShade = Color(0xFFD8C8AC);
+  static const night = Color(0xFF1C2463);
+  static const nightHi = Color(0xFF3B3A8E);
+  static const nightDeep = Color(0xFF121640);
+  static const onNight = Color(0xFFF4F1FF);
+  static const onNightSoft = Color(0xFFC9C6E8);
 }
 
-/// Type scale: Frank Ruhl Libre for anything read like a book (titles,
-/// blessings, songs), Heebo for the interface.
+/// Fredoka (round, playful) for numbers and buttons, Frank Ruhl Libre for
+/// titles and anything sacred, Rubik for reading.
 class AppText {
+  static const round = 'Fredoka';
   static const serif = 'FrankRuhlLibre';
-  static const sans = 'Heebo';
+  static const sans = 'Rubik';
 
-  /// The night as a Hebrew numeral (ד׳). The one loud element.
   static const numeral = TextStyle(
-    fontFamily: serif,
-    fontSize: 104,
-    height: 0.9,
-    fontWeight: FontWeight.w700,
-    color: AppColors.brass,
-    shadows: [Shadow(color: Color(0x40F2C66B), blurRadius: 30)],
-  );
-
+      fontFamily: round, fontSize: 44, height: 1.05, fontWeight: FontWeight.w700, color: AppColors.ink);
   static const display = TextStyle(
-      fontFamily: serif, fontSize: 34, height: 1.1, fontWeight: FontWeight.w700);
+      fontFamily: serif, fontSize: 31, height: 1.1, fontWeight: FontWeight.w700, color: AppColors.ink);
   static const title = TextStyle(
-      fontFamily: serif, fontSize: 28, height: 1.15, fontWeight: FontWeight.w700);
+      fontFamily: serif, fontSize: 24, height: 1.15, fontWeight: FontWeight.w700, color: AppColors.ink);
   static const heading = TextStyle(
-      fontFamily: sans, fontSize: 17, height: 1.3, fontWeight: FontWeight.w700);
-  static const body = TextStyle(fontFamily: sans, fontSize: 16, height: 1.45);
+      fontFamily: sans, fontSize: 16.5, height: 1.3, fontWeight: FontWeight.w700, color: AppColors.ink);
+  static const body =
+      TextStyle(fontFamily: sans, fontSize: 16, height: 1.45, color: AppColors.ink);
   static const small =
-      TextStyle(fontFamily: sans, fontSize: 14, height: 1.4, color: AppColors.mist);
+      TextStyle(fontFamily: sans, fontSize: 13.5, height: 1.4, color: AppColors.muted);
+  static const button = TextStyle(
+      fontFamily: round, fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white);
 
-  /// Blessings and songs: large, roomy, with nikud room.
+  /// Blessings and songs.
   static const prayer = TextStyle(
-      fontFamily: serif, fontSize: 25, height: 1.75, fontWeight: FontWeight.w500);
+      fontFamily: serif, fontSize: 23, height: 1.75, fontWeight: FontWeight.w500, color: AppColors.ink);
   static const lyric = TextStyle(
-      fontFamily: serif, fontSize: 21, height: 1.35, fontWeight: FontWeight.w500);
+      fontFamily: serif, fontSize: 21, height: 1.35, fontWeight: FontWeight.w500, color: AppColors.ink);
   static const chord = TextStyle(
-      fontFamily: sans,
-      fontSize: 13.5,
-      height: 1.2,
-      fontWeight: FontWeight.w800,
-      color: AppColors.brass);
+      fontFamily: sans, fontSize: 13.5, height: 1.2, fontWeight: FontWeight.w800, color: AppColors.blue);
+}
+
+/// The outline + hard shadow every raised thing shares.
+class Ink2 {
+  static const border = BorderSide(color: AppColors.ink, width: 2);
+  static List<BoxShadow> shadow([double dx = 3, double dy = 3]) =>
+      [BoxShadow(color: AppColors.ink, offset: Offset(dx, dy), blurRadius: 0)];
 }
 
 class AppTheme {
-  /// Backwards-compatible names used across the screens.
-  static const bodyFont = AppText.sans;
-  static const blessingFont = AppText.serif;
-
-  static ThemeData dark() {
+  static ThemeData light() {
     final base = ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       fontFamily: AppText.sans,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.brass,
-        onPrimary: AppColors.ink,
-        secondary: AppColors.olive,
-        onSecondary: AppColors.ink,
-        surface: AppColors.sky,
-        onSurface: AppColors.parch,
-        surfaceContainerHighest: AppColors.glass,
-        surfaceContainerHigh: AppColors.glass,
-        surfaceContainer: AppColors.sky,
-        outline: AppColors.mist,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.orange,
+        onPrimary: Colors.white,
+        secondary: AppColors.blue,
+        onSecondary: Colors.white,
+        surface: AppColors.paper,
+        onSurface: AppColors.ink,
+        surfaceContainerHighest: AppColors.card,
+        surfaceContainerHigh: AppColors.card,
+        surfaceContainer: AppColors.paper,
+        outline: AppColors.ink,
         error: AppColors.ember,
       ),
-      scaffoldBackgroundColor: AppColors.sky,
+      scaffoldBackgroundColor: AppColors.paper,
       splashFactory: InkRipple.splashFactory,
     );
-    final rounded16 =
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(18));
+    final pill = RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30), side: Ink2.border);
     return base.copyWith(
-      textTheme: base.textTheme.apply(
-          bodyColor: AppColors.parch, displayColor: AppColors.parch),
+      textTheme: base.textTheme.apply(bodyColor: AppColors.ink, displayColor: AppColors.ink),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        foregroundColor: AppColors.parch,
+        foregroundColor: AppColors.ink,
         titleTextStyle: TextStyle(
             fontFamily: AppText.serif,
-            fontSize: 21,
+            fontSize: 24,
             fontWeight: FontWeight.w700,
-            color: AppColors.parch),
+            color: AppColors.ink),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.glass,
+        color: AppColors.card,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20), side: Ink2.border),
       ),
       dividerTheme: const DividerThemeData(color: AppColors.line, thickness: 1, space: 1),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.brass,
-          foregroundColor: AppColors.ink,
-          disabledBackgroundColor: AppColors.glass,
-          disabledForegroundColor: AppColors.mist,
-          minimumSize: const Size.fromHeight(58),
-          textStyle: const TextStyle(
-              fontFamily: AppText.sans, fontSize: 19, fontWeight: FontWeight.w800),
-          shape: rounded16,
+          backgroundColor: AppColors.orange,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: AppColors.paper2,
+          disabledForegroundColor: AppColors.muted,
+          minimumSize: const Size.fromHeight(56),
+          textStyle: AppText.button,
+          shape: pill,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.parch,
+          foregroundColor: AppColors.ink,
+          backgroundColor: AppColors.card,
           minimumSize: const Size.fromHeight(52),
-          side: const BorderSide(color: Color(0x38F3E9D7)),
+          side: Ink2.border,
           textStyle: const TextStyle(
-              fontFamily: AppText.sans, fontSize: 16, fontWeight: FontWeight.w600),
-          shape: rounded16,
+              fontFamily: AppText.round, fontSize: 17, fontWeight: FontWeight.w600),
+          shape: pill,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.brass,
+          foregroundColor: AppColors.blue,
           textStyle: const TextStyle(
               fontFamily: AppText.sans, fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.glass,
-        hintStyle: const TextStyle(color: AppColors.mist),
-        counterStyle: const TextStyle(color: AppColors.mist),
+        fillColor: AppColors.card,
+        hintStyle: const TextStyle(color: AppColors.muted),
+        counterStyle: const TextStyle(color: AppColors.muted),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: Ink2.border,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderSide: Ink2.border,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.brass, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.orange, width: 2.5),
         ),
       ),
       chipTheme: base.chipTheme.copyWith(
-        backgroundColor: AppColors.glass,
-        selectedColor: AppColors.brass,
-        side: BorderSide.none,
+        backgroundColor: AppColors.card,
+        selectedColor: AppColors.gold,
+        side: Ink2.border,
         showCheckmark: false,
-        labelStyle: const TextStyle(fontFamily: AppText.sans, color: AppColors.parch),
+        labelStyle: const TextStyle(
+            fontFamily: AppText.sans, color: AppColors.ink, fontWeight: FontWeight.w500),
         secondaryLabelStyle: const TextStyle(
-            fontFamily: AppText.sans,
-            color: AppColors.ink,
-            fontWeight: FontWeight.w700),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            fontFamily: AppText.sans, color: AppColors.ink, fontWeight: FontWeight.w700),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((s) =>
-            s.contains(WidgetState.selected) ? AppColors.ink : AppColors.mist),
+        thumbColor: WidgetStateProperty.all(Colors.white),
         trackColor: WidgetStateProperty.resolveWith((s) =>
-            s.contains(WidgetState.selected) ? AppColors.olive : AppColors.sill),
-        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+            s.contains(WidgetState.selected) ? AppColors.orange : AppColors.paper2),
+        trackOutlineColor: WidgetStateProperty.all(AppColors.ink),
+        trackOutlineWidth: WidgetStateProperty.all(2),
       ),
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith((s) =>
-            s.contains(WidgetState.selected) ? AppColors.brass : AppColors.mist),
+            s.contains(WidgetState.selected) ? AppColors.orange : AppColors.ink),
       ),
       snackBarTheme: const SnackBarThemeData(
-        backgroundColor: AppColors.glassHi,
-        contentTextStyle: TextStyle(fontFamily: AppText.sans, color: AppColors.parch),
+        backgroundColor: AppColors.ink,
+        contentTextStyle: TextStyle(fontFamily: AppText.sans, color: Colors.white),
         behavior: SnackBarBehavior.floating,
       ),
       bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: AppColors.sky,
+        backgroundColor: AppColors.paper,
         showDragHandle: true,
-        dragHandleColor: AppColors.sill,
+        dragHandleColor: AppColors.ink,
       ),
       pageTransitionsTheme: const PageTransitionsTheme(builders: {
         TargetPlatform.android: ZoomPageTransitionsBuilder(),

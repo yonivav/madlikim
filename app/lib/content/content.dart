@@ -183,7 +183,7 @@ class ContentBook {
     if (node is List) {
       if (node.isEmpty) return '';
       final i = index ?? _random.nextInt(node.length);
-      return _resolve(node[i.clamp(0, node.length - 1)], form, null);
+      return _resolve(node[i % node.length], form, null);
     }
     if (node is Map<String, dynamic>) {
       final key = switch (form) {

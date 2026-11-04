@@ -36,7 +36,10 @@ const _monthNames = {
   13: 'אדר ב',
 };
 
-String hebrewMonthName(int month) => _monthNames[month] ?? '';
+String hebrewMonthName(int month, {bool leapYear = false}) {
+  if (leapYear && month == 12) return 'אדר א';
+  return _monthNames[month] ?? '';
+}
 
 /// "ראשון", "שני" ... "שמיני" (ordinal, masculine, for "נר ___").
 const ordinalsMasculine = [

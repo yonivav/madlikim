@@ -42,4 +42,18 @@ void main() {
           reason: 'year $y');
     }
   });
+
+  test('Hebrew date from a civil date', () {
+    final rh = HebrewCalendar.hebrewFromDate(DateTime(2026, 9, 12));
+    expect([rh.year, rh.month, rh.day], [5787, HebrewMonth.tishri, 1]);
+    final k25 = HebrewCalendar.hebrewFromDate(DateTime(2026, 12, 5));
+    expect([k25.year, k25.month, k25.day], [5787, HebrewMonth.kislev, 25]);
+    final tevet1 = HebrewCalendar.hebrewFromDate(DateTime(2026, 12, 11));
+    expect([tevet1.month, tevet1.day], [HebrewMonth.tevet, 1]);
+    // Round trip over two years.
+    for (var d = DateTime.utc(2026, 1, 1); d.year < 2028; d = d.add(const Duration(days: 1))) {
+      final h = HebrewCalendar.hebrewFromDate(d);
+      expect(HebrewCalendar.gregorianFromHebrew(h.year, h.month, h.day), d);
+    }
+  });
 }

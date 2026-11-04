@@ -1,241 +1,139 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/app_phase.dart';
 import '../../core/hanukkah.dart';
-import '../../social/social_models.dart';
+import '../../core/hebrew_calendar.dart';
+import '../../core/hebrew_numerals.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
-import '../widgets/avatars.dart';
 import '../widgets/common.dart';
-import '../widgets/menorah.dart';
-import '../widgets/window_scene.dart';
-import 'faq_screen.dart';
-import 'groups_screen.dart';
+import '../widgets/neri.dart';
+import '../widgets/scene.dart';
 import 'invite_screens.dart';
 import 'lighting_screen.dart';
-import 'my_menorah_screen.dart';
 import 'settings_screen.dart';
-import 'shabbat_view.dart';
+import 'shell.dart';
 import 'songs_screen.dart';
 
+/// Neri in the middle, light rising behind him night by night, one big
+/// action. Modeled on the "mascot + level" home of hydration apps.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final snap = ref.watch(phaseProvider);
-    if (snap.phase == AppPhase.shabbat) {
-      return ShabbatView(endsAt: snap.shabbatEndsAt);
-    }
-    final profile = ref.watch(profileProvider)!;
-    final now = ref.watch(nowProvider).valueOrNull ?? DateTime.now().toUtc();
-    final lit = ref.watch(litNightsProvider);
-
-    return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          WindowScene(
-            overlay: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 12, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        text: '${greeting(now, profile.place)}, ',
-                        style: AppText.small.copyWith(fontSize: 15),
-                        children: [
-                          TextSpan(
-                            text: profile.displayName,
-                            style: const TextStyle(
-                                color: AppColors.parch,
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'הגדרות',
-                    style: IconButton.styleFrom(
-                        backgroundColor: const Color(0x0FF3E9D7)),
-                    icon: const Icon(Icons.settings_outlined,
-                        color: AppColors.mist, size: 20),
-                    onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (_) => const SettingsScreen())),
-                  ),
-                ],
-              ),
-            ),
-            child: _sceneMenorah(snap, lit),
-          ),
-          _Tonight(snap: snap),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(24, 22, 24, 40),
-            child: _Rows(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// What stands on the windowsill depends on the moment.
-  Widget _sceneMenorah(PhaseSnapshot snap, Set<int> lit) {
-    final n = snap.night;
-    switch (snap.phase) {
-      case AppPhase.lightingWindow:
-      case AppPhase.hanukkahDay:
-        return Menorah(
-          placed: {for (var i = 0; i < n!.number; i++) i},
-          height: 230,
-          glow: .35,
-        );
-      case AppPhase.litTonight:
-        final all = {for (var i = 0; i < n!.number; i++) i};
-        return Menorah(placed: all, lit: all, shamashLit: true, height: 230);
-      case AppPhase.afterHanukkah:
-        final positions = {for (final x in lit) x - 1};
-        return Menorah(
-            placed: positions,
-            lit: positions,
-            shamashLit: positions.isNotEmpty,
-            height: 230,
-            glow: .6);
-      default:
-        return const Menorah(height: 230);
-    }
-  }
-}
-
-class _Tonight extends ConsumerWidget {
-  const _Tonight({required this.snap});
-  final PhaseSnapshot snap;
 
   void _openLighting(BuildContext context, WidgetRef ref, HanukkahNight n) {
     ref
         .read(localStoreProvider)
         .logEvent('lighting_screen_open', {'night': n.number, 'source': 'home'});
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => LightingScreen(night: n)));
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => LightingScreen(night: n)));
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final snap = ref.watch(phaseProvider);
     final content = ref.watch(contentProvider);
     final profile = ref.watch(profileProvider)!;
     final place = profile.place;
+    final score = ref.watch(scoreProvider);
+    final now = ref.watch(nowProvider).valueOrNull ?? DateTime.now().toUtc();
     final night = snap.night;
 
-    String mark; // the big brass thing on the right
-    String title;
-    String? sub;
-    InlineSpan? when;
-    Widget? action;
+    // Hebrew date tile: tonight's date during Hanukkah, today's otherwise.
+    String tileDay, tileMonth;
+    if (night != null) {
+      tileDay = hebrewNumeral(night.hebrewDay);
+      tileMonth = hebrewMonthName(night.hebrewMonth);
+    } else {
+      final local = tz.TZDateTime.from(now, tz.getLocation(place.timeZone));
+      final h = HebrewCalendar.hebrewFromDate(local);
+      tileDay = hebrewNumeral(h.day);
+      tileMonth = hebrewMonthName(h.month, leapYear: HebrewCalendar.isLeapYear(h.year));
+    }
 
-    TextSpan time(String t) => TextSpan(
-        text: t,
-        style: const TextStyle(
-            color: AppColors.flame, fontWeight: FontWeight.w700));
+    String neri(String key, {Map<String, Object?> vars = const {}}) => content.text('neri.$key',
+        form: profile.addressForm, vars: vars, index: night?.number ?? 0);
+
+    late String title;
+    late String bubble;
+    var mood = NeriMood.happy;
+    var arms = NeriArms.down;
+    var lit = false;
+    Widget? action;
 
     switch (snap.phase) {
       case AppPhase.offSeason:
-      case AppPhase.countdown:
-        mark = '${snap.daysUntilStart}';
-        title = snap.phase == AppPhase.countdown
-            ? 'ימים לחנוכה'
-            : content.text('home.offSeason');
-        sub = 'נר ראשון ב־${snap.season.first.day}.${snap.season.first.month}';
-        if (snap.phase == AppPhase.countdown) {
-          when = TextSpan(
-              text: say(profile.addressForm,
-                  m: 'יש לך נרות בבית? זה הזמן לקנות.',
-                  f: 'יש לך נרות בבית? זה הזמן לקנות.',
-                  p: 'יש נרות בבית? זה הזמן לקנות.'));
-        }
-        // Lets people (and store reviewers) see the lighting flow early.
-        action = OutlinedButton(
+        title = content.text('home.offSeason');
+        bubble = neri('offSeason');
+        mood = NeriMood.sleep;
+        action = BrassButton(
+          label: 'להתכונן: הברכות וסדר ההדלקה',
+          ghost: true,
           onPressed: () => _openLighting(context, ref, snap.season.first),
-          child: const Text('להתכונן: הברכות וסדר ההדלקה'),
+        );
+      case AppPhase.countdown:
+        title = '${snap.daysUntilStart} ימים לחנוכה';
+        bubble = neri('countdown', vars: {'count': snap.daysUntilStart});
+        arms = NeriArms.wave;
+        action = BrassButton(
+          label: 'להתכונן: הברכות וסדר ההדלקה',
+          ghost: true,
+          onPressed: () => _openLighting(context, ref, snap.season.first),
         );
       case AppPhase.eveOfHanukkah:
-        final first = snap.season.first;
-        mark = 'מחר';
-        title = 'מתחילים';
-        sub = first.hebrewDateLabel;
-        when = TextSpan(children: [
-          const TextSpan(text: 'נר ראשון, מדליקים מ־'),
-          time(hhmm(first.windowStart, place)),
-        ]);
-        action = OutlinedButton(
-          onPressed: () => _openLighting(context, ref, first),
-          child: const Text('ללמוד את הברכות מראש'),
+        title = 'מחר מתחילים';
+        bubble = neri('eve');
+        mood = NeriMood.excited;
+        arms = NeriArms.wave;
+        action = BrassButton(
+          label: 'ללמוד את הברכות מראש',
+          ghost: true,
+          onPressed: () => _openLighting(context, ref, snap.season.first),
         );
       case AppPhase.hanukkahDay:
         final n = night!;
-        mark = nightLetter(n.number);
         title = n.title;
-        sub = n.hebrewDateLabel;
-        when = switch (n.kind) {
-          NightKind.erevShabbat => TextSpan(children: [
-              const TextSpan(text: 'ערב שבת: מדליקים לפני '),
-              time(hhmm(n.preferredUntil, place)),
-            ]),
-          NightKind.motzeiShabbat => TextSpan(children: [
-              const TextSpan(text: 'מדליקים אחרי צאת השבת, '),
-              time(hhmm(n.windowStart, place)),
-            ]),
-          NightKind.weekday => TextSpan(children: [
-              const TextSpan(text: 'מדליקים מ־'),
-              time(hhmm(n.windowStart, place)),
-            ]),
-        };
-        action = OutlinedButton(
+        bubble = n.kind == NightKind.erevShabbat
+            ? neri('windowFriday')
+            : neri('today', vars: {'title': n.title, 'time': hhmm(n.windowStart, place)});
+        action = BrassButton(
+          label: 'לראות מה עושים',
+          ghost: true,
           onPressed: () => _openLighting(context, ref, n),
-          child: const Text('לראות מה עושים'),
         );
       case AppPhase.lightingWindow:
         final n = night!;
-        mark = nightLetter(n.number);
         title = n.title;
-        sub = n.hebrewDateLabel;
-        when = n.kind == NightKind.erevShabbat
-            ? TextSpan(children: [
-                const TextSpan(text: 'מדליקים עכשיו. כניסת שבת ב־'),
-                time(hhmm(n.preferredUntil, place)),
-              ])
-            : TextSpan(children: [
-                const TextSpan(text: 'אפשר להדליק עכשיו. עדיף עד '),
-                time(hhmm(n.preferredUntil, place)),
-              ]);
+        bubble = n.kind == NightKind.erevShabbat
+            ? neri('windowFriday')
+            : neri('window', vars: {'title': n.title});
+        mood = NeriMood.excited;
+        arms = NeriArms.up;
         action = BrassButton(
           label: 'מדליקים',
+          emoji: '🔥',
           onPressed: () => _openLighting(context, ref, n),
         );
       case AppPhase.litTonight:
         final n = night!;
-        mark = nightLetter(n.number);
         title = n.isLast ? 'וזאת חנוכה' : n.title;
-        sub = n.hebrewDateLabel;
-        when = TextSpan(
-            text: n.isLast
-                ? 'כל שמונת הנרות. סיימת יפה.'
-                : 'החנוכייה שלך מאירה. נתראה מחר בערב.');
-        action = OutlinedButton.icon(
+        bubble = n.isLast ? neri('litLast') : neri('lit');
+        lit = true;
+        arms = NeriArms.up;
+        action = BrassButton(
+          label: 'מעוז צור, עם אקורדים',
+          ghost: true,
           onPressed: () => Navigator.of(context)
               .push(MaterialPageRoute(builder: (_) => const SongsScreen())),
-          icon: const Icon(Icons.music_note_outlined, size: 20),
-          label: const Text('מעוז צור, עם אקורדים'),
         );
       case AppPhase.afterHanukkah:
-        final score = ref.watch(scoreProvider);
-        mark = '${score.nightsLit}';
-        title = 'לילות השנה';
-        sub = '${score.light} אור';
-        when = TextSpan(text: content.text('home.after'));
-        action = OutlinedButton.icon(
+        title = 'חנוכה שמח';
+        bubble = neri('after', vars: {'nights': score.nightsLit});
+        lit = score.nightsLit > 0;
+        mood = NeriMood.wink;
+        action = BrassButton(
+          label: 'לשתף את הסיכום',
+          icon: Icons.ios_share,
           onPressed: () {
             ref.read(localStoreProvider).logEvent('share_tapped', {'kind': 'summary'});
             shareText(content.text('share.summary', vars: {
@@ -244,139 +142,109 @@ class _Tonight extends ConsumerWidget {
               'link': content.appLink,
             }));
           },
-          icon: const Icon(Icons.ios_share, size: 20),
-          label: const Text('לשתף את הסיכום'),
         );
       case AppPhase.shabbat:
-        mark = '';
         title = content.text('home.shabbat');
+        bubble = '';
+        mood = NeriMood.sleep;
     }
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    final subtitle = score.nightsLit == 0
+        ? '${greeting(now, place)}, ${profile.displayName}'
+        : '${score.nightsLit} מתוך 8 לילות, ${score.light} אור';
+    // The light starts as a glow at the bottom and rises with every night.
+    final level = .14 + .86 * score.nightsLit / 8;
+
+    return SafeArea(
+      bottom: false,
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 16),
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 16, 0),
+            child: Row(
+              children: [
+                DateTile(day: tileDay, month: tileMonth),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: AppText.display),
+                      const SizedBox(height: 2),
+                      Text(subtitle, style: AppText.small),
+                    ],
+                  ),
+                ),
+                if (score.currentStreak >= 2) ...[
+                  InkChip(text: '🔥 ${score.currentStreak}'),
+                  const SizedBox(width: 6),
+                ],
+                IconButton(
+                  tooltip: 'הגדרות',
+                  icon: const Icon(Icons.settings_outlined, color: AppColors.ink),
+                  onPressed: () => Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (_) => const SettingsScreen())),
+                ),
+              ],
+            ),
+          ),
+          if (bubble.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(26, 18, 26, 0),
+              child: SpeechBubble(bubble),
+            ),
+          SizedBox(
+            height: 330,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                Positioned.fill(top: 20, child: LightLevel(fraction: level)),
+                const Positioned(right: -10, bottom: 0, child: OliveBranch()),
+                const Positioned(left: -10, bottom: 0, child: OliveBranch(flip: true)),
+                Positioned(
+                  bottom: 14,
+                  child: Neri(
+                    size: 180,
+                    mood: mood,
+                    arms: arms,
+                    lit: lit,
+                    semanticLabel: 'נרי, $bubble',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 84),
-                child: Text(
-                  mark,
-                  textAlign: TextAlign.center,
-                  style: mark.length > 2
-                      ? AppText.numeral.copyWith(fontSize: 64, height: 1.2)
-                      : AppText.numeral,
-                ),
+              CircleAction(
+                emoji: '🎶',
+                label: 'שירים',
+                onTap: () => ref.read(shellTabProvider.notifier).state = 3,
               ),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 6),
-                    Text(title, style: AppText.display.copyWith(fontSize: 32)),
-                    if (sub != null) ...[
-                      const SizedBox(height: 4),
-                      Text(sub, style: AppText.small),
-                    ],
-                    if (when != null) ...[
-                      const SizedBox(height: 10),
-                      Text.rich(when, style: AppText.body),
-                    ],
-                  ],
-                ),
+              const SizedBox(width: 14),
+              CircleAction(
+                emoji: '👨‍👩‍👧',
+                label: 'החבר\'ה',
+                onTap: () => ref.read(shellTabProvider.notifier).state = 2,
+              ),
+              const SizedBox(width: 14),
+              CircleAction(
+                emoji: '🏠',
+                label: 'להזמין',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const InviteCreateScreen())),
               ),
             ],
           ),
-          if (action != null) ...[const SizedBox(height: 20), action],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(26, 16, 26, 0),
+            child: action,
+          ),
         ],
       ),
-    );
-  }
-}
-
-class _Rows extends ConsumerWidget {
-  const _Rows();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final groups = ref.watch(myGroupsProvider).valueOrNull ?? const <Group>[];
-    final invites =
-        ref.watch(myInvitesProvider).valueOrNull ?? const <HostInvite>[];
-    final score = ref.watch(scoreProvider);
-    final season = ref.watch(seasonProvider);
-
-    void go(Widget page) =>
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
-
-    final next = invites.isEmpty ? null : invites.first;
-
-    return Column(
-      children: [
-        if (groups.isEmpty)
-          HairlineRow(
-            first: true,
-            title: 'חנוכייה משותפת',
-            subtitle: 'עם המשפחה או החבר\'ה. כל מי שמדליק אצלו מוסיף אור.',
-            onTap: () => go(const GroupsScreen()),
-          )
-        else
-          _GroupRow(group: groups.first, more: groups.length - 1),
-        HairlineRow(
-          title: 'בואו להדליק אצלי',
-          subtitle: next == null
-              ? 'מזמינים חברים לערב אחד, עם סופגניות'
-              : '${season.night(next.night).title} ב־${next.time}, '
-                  '${next.count(RsvpStatus.yes)} מגיעים',
-          onTap: () => go(next == null
-              ? const InviteCreateScreen()
-              : const InvitesListScreen()),
-        ),
-        HairlineRow(
-          title: 'החנוכייה שלי',
-          subtitle: score.nightsLit == 0
-              ? 'כאן נאסף האור של כל הלילות'
-              : score.currentStreak >= 2
-                  ? '${score.light} אור, ${score.currentStreak} לילות ברצף'
-                  : '${score.light} אור, ${score.nightsLit} לילות',
-          onTap: () => go(const MyMenorahScreen()),
-        ),
-        HairlineRow(
-          title: 'שירים',
-          subtitle: 'הנרות הללו, מעוז צור עם אקורדים',
-          onTap: () => go(const SongsScreen()),
-        ),
-        HairlineRow(
-          title: 'למה ואיך',
-          subtitle: 'שאלות קצרות על ההדלקה',
-          onTap: () => go(const FaqScreen()),
-        ),
-      ],
-    );
-  }
-}
-
-class _GroupRow extends ConsumerWidget {
-  const _GroupRow({required this.group, required this.more});
-  final Group group;
-  final int more;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final night = ref.watch(socialNightProvider);
-    final data = ref.watch(groupNightProvider((group.id, night))).valueOrNull;
-    final litIds = data?.litMemberIds ?? const <String>{};
-    final title = more > 0 ? '${group.name} ועוד $more' : group.name;
-    return HairlineRow(
-      first: true,
-      title: title,
-      subtitle: '${litIds.length} מתוך ${group.members.length} כבר הדליקו הערב',
-      trailing: AvatarStack(members: group.members, litIds: litIds),
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) =>
-              more > 0 ? const GroupsScreen() : GroupScreen(groupId: group.id))),
     );
   }
 }

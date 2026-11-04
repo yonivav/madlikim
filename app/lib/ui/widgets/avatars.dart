@@ -4,12 +4,12 @@ import '../../social/social_models.dart';
 import '../theme.dart';
 
 const _tones = [
-  Color(0xFF3A4E7A),
-  Color(0xFF5A4A6E),
-  Color(0xFF4A6050),
-  Color(0xFF6E5A3E),
-  Color(0xFF3E5E6E),
-  Color(0xFF6A4452),
+  Color(0xFF7FB0FF),
+  Color(0xFFFFD95C),
+  Color(0xFFFFA8C2),
+  Color(0xFF86E3C2),
+  Color(0xFFFFB17A),
+  Color(0xFFBBA2FF),
 ];
 
 Color toneFor(String id) => _tones[id.hashCode.abs() % _tones.length];
@@ -37,14 +37,14 @@ class Avatar extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: toneFor(member.id),
-              border: Border.all(color: AppColors.sky, width: 2),
+              border: Border.all(color: AppColors.ink, width: 2),
             ),
             alignment: Alignment.center,
             child: Text(initial,
                 style: TextStyle(
                     fontSize: size * .42,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.parch)),
+                    color: AppColors.ink)),
           ),
           if (lit) const Positioned(top: 0, child: _TinyFlame()),
         ],
@@ -108,8 +108,8 @@ class AvatarStack extends StatelessWidget {
                 height: 34,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.sill,
-                  border: Border.all(color: AppColors.sky, width: 2),
+                  color: AppColors.paper2,
+                  border: Border.all(color: AppColors.ink, width: 2),
                 ),
                 alignment: Alignment.center,
                 child: Text('+$rest',
@@ -117,7 +117,7 @@ class AvatarStack extends StatelessWidget {
                     style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.mist)),
+                        color: AppColors.muted)),
               ),
             ),
         ],

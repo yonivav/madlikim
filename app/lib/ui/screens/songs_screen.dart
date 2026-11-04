@@ -36,7 +36,7 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
     final showChords = _chords && song.hasChords;
 
     return Scaffold(
-      backgroundColor: AppColors.skyDeep,
+      backgroundColor: AppColors.paper,
       appBar: AppBar(
         actions: [UnreviewedMark(reviewed: content.reviewed)],
       ),
@@ -121,7 +121,7 @@ class _KeyControl extends StatelessWidget {
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.glass,
+          color: AppColors.card,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -183,7 +183,7 @@ class _Stanza extends StatelessWidget {
                       fontFamily: AppText.serif,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.brass)),
+                      color: AppColors.orange)),
             ),
           for (var i = 0; i < lines.length; i++)
             Padding(

@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="neri.js"></script>
+<style>body{margin:0;background:transparent} svg{display:block}</style></head><body>
+<div id="full" style="width:1024px;height:1024px;position:relative;background:radial-gradient(70% 70% at 50% 45%,#5B74EA 0%,#2F45B8 55%,#1A2478 100%)"><div style="position:absolute;left:192px;top:120px;width:640px;height:960px" id="f1"></div></div>
+<div id="fg" style="width:1024px;height:1024px;position:relative"><div style="position:absolute;left:312px;top:250px;width:400px;height:600px" id="f2"></div></div>
+<div id="splash" style="width:768px;height:768px;position:relative"><div style="position:absolute;left:209px;top:110px;width:350px;height:525px" id="f3"></div></div>
+<div id="splash12" style="width:1152px;height:1152px;position:relative"><div style="position:absolute;left:376px;top:300px;width:400px;height:600px" id="f4"></div></div>
+<svg id="mono" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <g transform="translate(312 250) scale(2)">
+    <path d="M101 70 C 70 52, 78 22, 101 -8 C 124 22, 132 52, 101 70 Z" fill="#fff" transform="translate(0 20)"/>
+    <path d="M52 132 Q 52 102 100 102 Q 148 102 148 132 L 148 234 Q 148 256 126 256 L 74 256 Q 52 256 52 234 Z" fill="#fff"/>
+    <ellipse cx="80" cy="168" rx="11" ry="14" fill="#000"/><ellipse cx="120" cy="168" rx="11" ry="14" fill="#000"/>
+    <path d="M88 190 Q 100 208 112 190 Z" fill="#000"/>
+  </g></svg>
+<script>
+document.getElementById('f1').innerHTML = neri({mood:'happy', lit:true, arms:'up', glow:1.2});
+document.getElementById('f2').innerHTML = neri({mood:'happy', lit:true, arms:'up'});
+document.getElementById('f3').innerHTML = neri({mood:'happy', lit:true, arms:'wave'});
+document.getElementById('f4').innerHTML = neri({mood:'happy', lit:true, arms:'wave'});
+</script></body></html>
