@@ -64,33 +64,37 @@ class Shell extends ConsumerWidget {
                           HapticFeedback.selectionClick();
                           ref.read(shellTabProvider.notifier).state = i;
                         },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            AnimatedScale(
-                              duration: const Duration(milliseconds: 200),
-                              scale: i == index ? 1 : .9,
-                              child: GlossBox(
-                                width: 38,
-                                height: 38,
-                                decoration: i == index
-                                    ? Gloss.honey(shape: BoxShape.circle, lift: 5)
-                                    : const BoxDecoration(shape: BoxShape.circle),
-                                shine: i == index ? .6 : 0,
-                                alignment: Alignment.center,
-                                child: Text(_tabs[i].$1, style: const TextStyle(fontSize: 18)),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AnimatedScale(
+                                duration: const Duration(milliseconds: 200),
+                                scale: i == index ? 1 : .9,
+                                child: GlossBox(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: i == index
+                                      ? Gloss.honey(shape: BoxShape.circle, lift: 5)
+                                      : const BoxDecoration(shape: BoxShape.circle),
+                                  shine: i == index ? .6 : 0,
+                                  alignment: Alignment.center,
+                                  child: Text(_tabs[i].$1, style: const TextStyle(fontSize: 18)),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _tabs[i].$2,
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: i == index ? FontWeight.w700 : FontWeight.w500,
-                                color: i == index ? AppColors.ink : AppColors.muted,
+                              const SizedBox(height: 2),
+                              Text(
+                                _tabs[i].$2,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: i == index ? FontWeight.w700 : FontWeight.w500,
+                                  color: i == index ? AppColors.ink : AppColors.muted,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
