@@ -120,10 +120,7 @@ class _KeyControl extends StatelessWidget {
       textDirection: TextDirection.ltr,
       child: Container(
         height: 40,
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: Gloss.pearl(lift: 5),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

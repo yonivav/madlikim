@@ -167,6 +167,8 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
                               child: OlivePill(
                                 emoji: badgeInfo[b]!.emoji,
                                 text: 'תג חדש: ${badgeInfo[b]!.title}',
+                                labelColor: AppColors.onNight,
+                                width: 160,
                               ),
                             ),
                         ],
@@ -192,7 +194,7 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
                         const SizedBox(height: 12),
                         BrassButton(
                           label: 'מעוז צור, עם אקורדים',
-                          ghost: true,
+                          night: true,
                           onPressed: () => Navigator.of(context).pushReplacement(
                               MaterialPageRoute(builder: (_) => const SongsScreen())),
                         ),
@@ -219,6 +221,6 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
     height: 1.1,
     fontWeight: FontWeight.w700,
     color: AppColors.gold,
-    shadows: [Shadow(color: Color(0xFFB3561C), offset: Offset(0, 3))],
+    shadows: [Shadow(color: Color(0x99FFC63A), blurRadius: 22)],
   );
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// "Neri": warm paper, ink outlines with a hard offset shadow, an orange
+/// "Neri": warm paper, glossy round surfaces with soft shadows, an orange
 /// action color, Hanukkah blue, and golden light that rises night by night.
 /// Night screens (celebration, Shabbat) switch to deep blue.
 class AppColors {
@@ -61,11 +61,184 @@ class AppText {
       fontFamily: sans, fontSize: 13.5, height: 1.2, fontWeight: FontWeight.w800, color: AppColors.blue);
 }
 
-/// The outline + hard shadow every raised thing shares.
+/// Soft edges every raised thing shares: a light rim and a warm, blurred
+/// shadow. (Was an ink outline with a hard shadow; the glossy redesign keeps
+/// the outline only on the characters.)
 class Ink2 {
-  static const border = BorderSide(color: AppColors.ink, width: 2);
-  static List<BoxShadow> shadow([double dx = 3, double dy = 3]) =>
-      [BoxShadow(color: AppColors.ink, offset: Offset(dx, dy), blurRadius: 0)];
+  static const border = BorderSide(color: Color(0xE6FFFFFF), width: 1.5);
+  static List<BoxShadow> shadow([double dx = 0, double dy = 8]) => Gloss.soft(dy);
+}
+
+/// The glossy material: candy gradients, a shine on top, colored glow below.
+/// Shapes are always round: circles and stadiums, or big radii for cards.
+class Gloss {
+  static List<BoxShadow> soft([double lift = 8, Color tint = const Color(0xFF78501E)]) => [
+        BoxShadow(
+            color: tint.withValues(alpha: .22),
+            offset: Offset(0, lift + 2),
+            blurRadius: lift * 2.6,
+            spreadRadius: -lift * .8),
+        BoxShadow(color: tint.withValues(alpha: .08), offset: const Offset(0, 2), blurRadius: 4),
+      ];
+
+  static List<BoxShadow> glow(Color c, [double lift = 10]) => [
+        BoxShadow(
+            color: c.withValues(alpha: .55),
+            offset: Offset(0, lift + 2),
+            blurRadius: lift * 2.4,
+            spreadRadius: -lift * .9),
+      ];
+
+  static const pearlGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFFFFFF), Color(0xFFFFF8EC), Color(0xFFF7EAD2)],
+    stops: [0, .8, 1],
+  );
+  static const candyGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFF9A5C), AppColors.orange, Color(0xFFDD5216)],
+    stops: [0, .55, 1],
+  );
+  static const skyGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF6F9BFF), AppColors.blue, Color(0xFF2E5BC8)],
+    stops: [0, .6, 1],
+  );
+  static const honeyGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFFE48A), AppColors.gold, Color(0xFFF2A91E)],
+    stops: [0, .6, 1],
+  );
+  static const glassGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0x38FFFFFF), Color(0x14FFFFFF)],
+  );
+
+  static const rim = Border.fromBorderSide(Ink2.border);
+  static const glassRim =
+      Border.fromBorderSide(BorderSide(color: Color(0x4DFFFFFF), width: 1.5));
+
+  static BoxDecoration pearl({BoxShape shape = BoxShape.rectangle, BorderRadius? radius, double lift = 8}) =>
+      BoxDecoration(
+        gradient: pearlGradient,
+        shape: shape,
+        borderRadius: shape == BoxShape.circle ? null : radius ?? BorderRadius.circular(999),
+        border: rim,
+        boxShadow: soft(lift),
+      );
+
+  static BoxDecoration candy({BoxShape shape = BoxShape.rectangle, BorderRadius? radius}) => BoxDecoration(
+        gradient: candyGradient,
+        shape: shape,
+        borderRadius: shape == BoxShape.circle ? null : radius ?? BorderRadius.circular(999),
+        border: const Border.fromBorderSide(BorderSide(color: Color(0x40FFFFFF), width: 1.5)),
+        boxShadow: glow(AppColors.orange),
+      );
+
+  static BoxDecoration sky({BoxShape shape = BoxShape.rectangle, BorderRadius? radius}) => BoxDecoration(
+        gradient: skyGradient,
+        shape: shape,
+        borderRadius: shape == BoxShape.circle ? null : radius ?? BorderRadius.circular(999),
+        border: const Border.fromBorderSide(BorderSide(color: Color(0x40FFFFFF), width: 1.5)),
+        boxShadow: glow(AppColors.blue, 9),
+      );
+
+  static BoxDecoration honey({BoxShape shape = BoxShape.rectangle, BorderRadius? radius, double lift = 8}) =>
+      BoxDecoration(
+        gradient: honeyGradient,
+        shape: shape,
+        borderRadius: shape == BoxShape.circle ? null : radius ?? BorderRadius.circular(999),
+        border: const Border.fromBorderSide(BorderSide(color: Color(0x66FFFFFF), width: 1.5)),
+        boxShadow: glow(const Color(0xFFF2A91E), lift),
+      );
+
+  static BoxDecoration glass({BoxShape shape = BoxShape.rectangle, BorderRadius? radius}) => BoxDecoration(
+        gradient: glassGradient,
+        shape: shape,
+        borderRadius: shape == BoxShape.circle ? null : radius ?? BorderRadius.circular(999),
+        border: glassRim,
+        boxShadow: const [
+          BoxShadow(color: Color(0x66000000), offset: Offset(0, 14), blurRadius: 30, spreadRadius: -12),
+        ],
+      );
+}
+
+/// A glossy surface: [decoration] plus a soft white shine across the top.
+/// Use with one of the [Gloss] decorations.
+class GlossBox extends StatelessWidget {
+  const GlossBox({
+    super.key,
+    required this.decoration,
+    this.child,
+    this.width,
+    this.height,
+    this.padding,
+    this.alignment,
+    this.shine = .55,
+  });
+
+  final BoxDecoration decoration;
+  final Widget? child;
+  final double? width;
+  final double? height;
+  final EdgeInsetsGeometry? padding;
+  final AlignmentGeometry? alignment;
+  final double shine;
+
+  @override
+  Widget build(BuildContext context) {
+    final circle = decoration.shape == BoxShape.circle;
+    return Container(
+      width: width,
+      height: height,
+      decoration: decoration,
+      child: Stack(
+        fit: StackFit.passthrough,
+        alignment: alignment ?? AlignmentDirectional.topStart,
+        children: [
+          if (shine > 0)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: LayoutBuilder(builder: (context, c) {
+                  final h = c.maxHeight.isFinite ? c.maxHeight : 60.0;
+                  final w = c.maxWidth.isFinite ? c.maxWidth : 200.0;
+                  final shineH = (h * .42).clamp(6.0, 38.0);
+                  return Align(
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      margin: EdgeInsets.only(top: circle ? h * .07 : 3),
+                      width: w * (circle ? .62 : .76),
+                      height: shineH,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white.withValues(alpha: shine),
+                            Colors.white.withValues(alpha: 0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          if (child != null)
+            Padding(
+              padding: padding ?? EdgeInsets.zero,
+              child: alignment != null ? Align(alignment: alignment!, child: child) : child,
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class AppTheme {
@@ -90,8 +263,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.paper,
       splashFactory: InkRipple.splashFactory,
     );
-    final pill = RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30), side: Ink2.border);
+    const pill = StadiumBorder();
     return base.copyWith(
       textTheme: base.textTheme.apply(bodyColor: AppColors.ink, displayColor: AppColors.ink),
       appBarTheme: const AppBarTheme(
@@ -110,8 +282,7 @@ class AppTheme {
         color: AppColors.card,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), side: Ink2.border),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
       ),
       dividerTheme: const DividerThemeData(color: AppColors.line, thickness: 1, space: 1),
       filledButtonTheme: FilledButtonThemeData(
@@ -130,7 +301,8 @@ class AppTheme {
           foregroundColor: AppColors.ink,
           backgroundColor: AppColors.card,
           minimumSize: const Size.fromHeight(52),
-          side: Ink2.border,
+          elevation: 0,
+          side: const BorderSide(color: Color(0x1F1E2340), width: 1.5),
           textStyle: const TextStyle(
               fontFamily: AppText.round, fontSize: 17, fontWeight: FontWeight.w600),
           shape: pill,
@@ -148,36 +320,37 @@ class AppTheme {
         fillColor: AppColors.card,
         hintStyle: const TextStyle(color: AppColors.muted),
         counterStyle: const TextStyle(color: AppColors.muted),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: Ink2.border,
+          borderRadius: BorderRadius.circular(999),
+          borderSide: const BorderSide(color: Color(0x1F1E2340), width: 1.5),
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: Ink2.border,
+          borderRadius: BorderRadius.circular(999),
+          borderSide: const BorderSide(color: Color(0x1F1E2340), width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(999),
           borderSide: const BorderSide(color: AppColors.orange, width: 2.5),
         ),
       ),
       chipTheme: base.chipTheme.copyWith(
         backgroundColor: AppColors.card,
         selectedColor: AppColors.gold,
-        side: Ink2.border,
+        side: const BorderSide(color: Color(0x1F1E2340), width: 1.5),
         showCheckmark: false,
         labelStyle: const TextStyle(
             fontFamily: AppText.sans, color: AppColors.ink, fontWeight: FontWeight.w500),
         secondaryLabelStyle: const TextStyle(
             fontFamily: AppText.sans, color: AppColors.ink, fontWeight: FontWeight.w700),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.all(Colors.white),
         trackColor: WidgetStateProperty.resolveWith((s) =>
             s.contains(WidgetState.selected) ? AppColors.orange : AppColors.paper2),
-        trackOutlineColor: WidgetStateProperty.all(AppColors.ink),
-        trackOutlineWidth: WidgetStateProperty.all(2),
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
       ),
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith((s) =>
@@ -187,11 +360,18 @@ class AppTheme {
         backgroundColor: AppColors.ink,
         contentTextStyle: TextStyle(fontFamily: AppText.sans, color: Colors.white),
         behavior: SnackBarBehavior.floating,
+        shape: StadiumBorder(),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.paper,
         showDragHandle: true,
-        dragHandleColor: AppColors.ink,
+        dragHandleColor: Color(0x401E2340),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(36))),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(builders: {
         TargetPlatform.android: ZoomPageTransitionsBuilder(),

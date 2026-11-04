@@ -86,11 +86,7 @@ class Hanukkiah extends StatelessWidget {
                     width: 22 * s,
                     height: 22 * s,
                     alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.orange,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.ink, width: 2),
-                    ),
+                    decoration: Gloss.candy(shape: BoxShape.circle),
                     child: Text('${order[p]}',
                         textDirection: TextDirection.ltr,
                         style: TextStyle(
@@ -109,35 +105,57 @@ class Hanukkiah extends StatelessWidget {
   }
 }
 
+/// A brass hanukkiah: soft gold strokes with round ends, oval cups with a
+/// little shine. No ink outlines, so it sits in the glossy style.
 class _FramePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.scale(size.width / 360, size.height / 200);
     canvas.translate(0, 30);
-    final ink = Paint()
+    const brass = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Color(0xFFFFE08A), Color(0xFFE2A43A), Color(0xFFC9852A)],
+    );
+    final metal = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..color = AppColors.ink;
-    canvas.drawLine(const Offset(20, 128), const Offset(340, 128), ink..strokeWidth = 7);
+      ..shader = brass.createShader(const Rect.fromLTWH(0, 80, 360, 95));
+    // soft shadow under the whole thing
+    canvas.drawOval(
+      const Rect.fromLTWH(120, 162, 120, 14),
+      Paint()
+        ..color = const Color(0x33B06A10)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
     canvas.drawPath(
       Path()
         ..moveTo(30, 130)
         ..quadraticBezierTo(100, 165, 180, 165)
         ..quadraticBezierTo(260, 165, 330, 130),
-      ink..strokeWidth = 4,
+      metal..strokeWidth = 5,
     );
-    canvas.drawLine(const Offset(180, 128), const Offset(180, 166), ink..strokeWidth = 6);
-    canvas.drawLine(const Offset(150, 168), const Offset(210, 168), ink..strokeWidth = 6);
-    canvas.drawLine(const Offset(180, 128), const Offset(180, 92), ink..strokeWidth = 5);
-    final cup = Paint()..color = const Color(0xFFD9A441);
-    final cupLine = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = AppColors.ink;
+    canvas.drawLine(const Offset(20, 128), const Offset(340, 128), metal..strokeWidth = 9);
+    canvas.drawLine(const Offset(180, 128), const Offset(180, 164), metal..strokeWidth = 7);
+    canvas.drawLine(const Offset(180, 128), const Offset(180, 92), metal..strokeWidth = 6);
+    canvas.drawOval(
+        Rect.fromCenter(center: const Offset(180, 167), width: 64, height: 12),
+        Paint()..shader = brass.createShader(const Rect.fromLTWH(148, 161, 64, 12)));
+    // a highlight along the bar
+    canvas.drawLine(
+        const Offset(28, 125.5),
+        const Offset(332, 125.5),
+        Paint()
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = 2
+          ..color = const Color(0x99FFFFFF));
+
     void drawCup(double x, double y) {
-      final r = RRect.fromLTRBR(x - 12, y, x + 12, y + 10, const Radius.circular(3));
-      canvas.drawRRect(r, cup);
-      canvas.drawRRect(r, cupLine);
+      final r = Rect.fromCenter(center: Offset(x, y + 5), width: 28, height: 14);
+      canvas.drawOval(r, Paint()..shader = brass.createShader(r));
+      canvas.drawOval(
+          Rect.fromCenter(center: Offset(x, y + 2.5), width: 15, height: 4),
+          Paint()..color = const Color(0x99FFFFFF));
     }
 
     for (var p = 0; p < 8; p++) {

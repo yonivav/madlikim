@@ -202,9 +202,43 @@ class HomeScreen extends ConsumerWidget {
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                Positioned.fill(top: 20, child: LightLevel(fraction: level)),
-                const Positioned(right: -10, bottom: 0, child: OliveBranch()),
-                const Positioned(left: -10, bottom: 0, child: OliveBranch(flip: true)),
+                // A warm halo and a round "light orb" that fills night by night.
+                Positioned(
+                  bottom: 0,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: 320,
+                      height: 320,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(colors: [
+                          Color(0xB3FFD678),
+                          Color(0x40FFD678),
+                          Color(0x00FFD678),
+                        ], stops: [0, .45, .72]),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 6,
+                  child: Container(
+                    width: 250,
+                    height: 250,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const RadialGradient(
+                        center: Alignment(0, -.3),
+                        colors: [Color(0xFFFFFDF6), Color(0xFFFFF3D6)],
+                      ),
+                      border: Border.all(color: const Color(0xCCFFFFFF), width: 6),
+                      boxShadow: Gloss.glow(const Color(0xFFC8781E), 14),
+                    ),
+                    child: ClipOval(child: LightLevel(fraction: level)),
+                  ),
+                ),
+                const Positioned(right: -6, bottom: 0, child: OliveBranch()),
+                const Positioned(left: -6, bottom: 0, child: OliveBranch(flip: true)),
                 Positioned(
                   bottom: 14,
                   child: MyNeri(

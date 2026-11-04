@@ -36,8 +36,12 @@ class Avatar extends StatelessWidget {
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: toneFor(member.id),
-              border: Border.all(color: AppColors.ink, width: 2),
+              gradient: RadialGradient(
+                center: const Alignment(-.3, -.5),
+                colors: [Color.lerp(toneFor(member.id), Colors.white, .45)!, toneFor(member.id)],
+              ),
+              border: Border.all(color: Colors.white, width: 2.5),
+              boxShadow: Gloss.soft(4),
             ),
             alignment: Alignment.center,
             child: Text(initial,
@@ -108,8 +112,9 @@ class AvatarStack extends StatelessWidget {
                 height: 34,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.paper2,
-                  border: Border.all(color: AppColors.ink, width: 2),
+                  gradient: Gloss.pearlGradient,
+                  border: Border.all(color: Colors.white, width: 2.5),
+                  boxShadow: Gloss.soft(4),
                 ),
                 alignment: Alignment.center,
                 child: Text('+$rest',

@@ -233,25 +233,26 @@ class _Step extends StatelessWidget {
   Widget build(BuildContext context) {
     final i = bold == null ? -1 : text.indexOf(bold!);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: GlossBox(
+        decoration: Gloss.pearl(lift: 6),
+        shine: .9,
+        padding: const EdgeInsetsDirectional.fromSTEB(7, 7, 16, 7),
+        child: Row(
         children: [
-          Container(
+          GlossBox(
             width: 30,
             height: 30,
+            decoration: Gloss.honey(shape: BoxShape.circle, lift: 3),
+            shine: .6,
             alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.orange,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.ink, width: 2),
-            ),
             child: Text('$n',
                 style: const TextStyle(
                     fontFamily: AppText.round,
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
                     height: 1,
-                    color: Colors.white)),
+                    color: AppColors.ink)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -264,6 +265,7 @@ class _Step extends StatelessWidget {
                   ])),
           ),
         ],
+      ),
       ),
     );
   }
@@ -287,7 +289,7 @@ class _BlessingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SectionCard(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 4),
+      padding: const EdgeInsets.fromLTRB(22, 16, 22, 6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -296,12 +298,8 @@ class _BlessingCard extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: Container(
                 margin: const EdgeInsets.only(bottom: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.gold,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.ink, width: 1.5),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 3),
+                decoration: Gloss.honey(lift: 3),
                 child: const Text('רק הערב',
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
               ),

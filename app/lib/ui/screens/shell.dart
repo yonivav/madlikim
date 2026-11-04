@@ -45,14 +45,10 @@ class Shell extends ConsumerWidget {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-          child: Container(
-            height: 64,
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: AppColors.ink, width: 2),
-              boxShadow: Ink2.shadow(0, 3),
-            ),
+          child: GlossBox(
+            height: 68,
+            decoration: Gloss.pearl(lift: 10),
+            shine: .9,
             child: Row(
               children: [
                 for (var i = 0; i < _tabs.length; i++)
@@ -71,19 +67,19 @@ class Shell extends ConsumerWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            AnimatedContainer(
+                            AnimatedScale(
                               duration: const Duration(milliseconds: 200),
-                              width: 46,
-                              height: 26,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: i == index ? AppColors.gold : Colors.transparent,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                    color: i == index ? AppColors.ink : Colors.transparent,
-                                    width: 1.5),
+                              scale: i == index ? 1 : .9,
+                              child: GlossBox(
+                                width: 38,
+                                height: 38,
+                                decoration: i == index
+                                    ? Gloss.honey(shape: BoxShape.circle, lift: 5)
+                                    : const BoxDecoration(shape: BoxShape.circle),
+                                shine: i == index ? .6 : 0,
+                                alignment: Alignment.center,
+                                child: Text(_tabs[i].$1, style: const TextStyle(fontSize: 18)),
                               ),
-                              child: Text(_tabs[i].$1, style: const TextStyle(fontSize: 17)),
                             ),
                             const SizedBox(height: 2),
                             Text(

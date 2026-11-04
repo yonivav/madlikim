@@ -119,17 +119,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   for (var i = 0; i < 4; i++)
-                    Expanded(
-                      child: Container(
-                        height: 4,
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
-                        decoration: BoxDecoration(
-                          color: i <= _page ? AppColors.orange : AppColors.paper2,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOutBack,
+                      width: i == _page ? 28 : 10,
+                      height: 10,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: i <= _page
+                          ? Gloss.candy()
+                          : BoxDecoration(
+                              color: AppColors.paper2,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
                     ),
                 ],
               ),

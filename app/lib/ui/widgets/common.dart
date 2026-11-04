@@ -37,8 +37,9 @@ String nightLetter(int night) => '${'אבגדהוזח'[night - 1]}׳';
 Future<void> shareText(String text) =>
     SharePlus.instance.share(ShareParams(text: text));
 
-/// The primary action: an orange pill with an ink outline and a hard shadow.
-/// [ghost] makes it white (secondary).
+/// The primary action: a glossy orange candy pill with a warm glow.
+/// [ghost] makes it pearl white (secondary); [night] makes it frosted glass
+/// for the dark screens.
 class BrassButton extends StatefulWidget {
   const BrassButton({
     super.key,
@@ -46,8 +47,9 @@ class BrassButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.emoji,
-    this.height = 58,
+    this.height = 60,
     this.ghost = false,
+    this.night = false,
   });
 
   final String label;
@@ -59,6 +61,7 @@ class BrassButton extends StatefulWidget {
   final String? emoji;
   final double height;
   final bool ghost;
+  final bool night;
 
   @override
   State<BrassButton> createState() => _BrassButtonState();
@@ -72,10 +75,21 @@ class _BrassButtonState extends State<BrassButton> {
     final enabled = widget.onPressed != null;
     final fg = !enabled
         ? AppColors.muted
-        : widget.ghost
-            ? AppColors.ink
-            : Colors.white;
-    final press = _down ? 3.0 : 0.0;
+        : widget.night
+            ? Colors.white
+            : widget.ghost
+                ? AppColors.ink
+                : Colors.white;
+    final decoration = !enabled
+        ? BoxDecoration(
+            color: AppColors.paper2,
+            borderRadius: BorderRadius.circular(999),
+          )
+        : widget.night
+            ? Gloss.glass()
+            : widget.ghost
+                ? Gloss.pearl()
+                : Gloss.candy();
     return Semantics(
       button: true,
       enabled: enabled,
@@ -91,45 +105,38 @@ class _BrassButtonState extends State<BrassButton> {
                 widget.onPressed!();
               }
             : null,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 80),
-          height: widget.height,
-          width: double.infinity,
-          transform: Matrix4.translationValues(0, press, 0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.height / 2),
-            gradient: enabled && !widget.ghost
-                ? const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.orangeHi, AppColors.orange],
-                  )
-                : null,
-            color: !enabled
-                ? AppColors.paper2
-                : widget.ghost
-                    ? AppColors.card
-                    : null,
-            border: Border.all(color: enabled ? AppColors.ink : AppColors.muted, width: 2),
-            boxShadow: enabled ? Ink2.shadow(0, 4 - press) : null,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.icon != null) ...[
-                Icon(widget.icon, size: 20, color: fg),
-                const SizedBox(width: 8),
+        child: AnimatedScale(
+          scale: _down ? .96 : 1,
+          duration: const Duration(milliseconds: 90),
+          child: GlossBox(
+            height: widget.height,
+            width: double.infinity,
+            decoration: decoration,
+            shine: enabled ? (widget.ghost ? .9 : .45) : 0,
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.icon != null) ...[
+                  Icon(widget.icon, size: 20, color: fg),
+                  const SizedBox(width: 8),
+                ],
+                Flexible(
+                  child: Text(widget.label,
+                      textAlign: TextAlign.center,
+                      style: AppText.button.copyWith(
+                        color: fg,
+                        shadows: !enabled || widget.ghost
+                            ? null
+                            : const [Shadow(color: Color(0x40A03200), offset: Offset(0, 1), blurRadius: 2)],
+                      )),
+                ),
+                if (widget.emoji != null) ...[
+                  const SizedBox(width: 8),
+                  Text(widget.emoji!, style: const TextStyle(fontSize: 20)),
+                ],
               ],
-              Flexible(
-                child: Text(widget.label,
-                    textAlign: TextAlign.center,
-                    style: AppText.button.copyWith(color: fg)),
-              ),
-              if (widget.emoji != null) ...[
-                const SizedBox(width: 8),
-                Text(widget.emoji!, style: const TextStyle(fontSize: 20)),
-              ],
-            ],
+            ),
           ),
         ),
       ),
@@ -137,11 +144,13 @@ class _BrassButtonState extends State<BrassButton> {
   }
 }
 
-/// Neri's speech bubble: cream pill, ink outline, little tail.
+/// Neri's speech bubble: a pearl pill with a thought-bubble tail of two dots.
 class SpeechBubble extends StatelessWidget {
   const SpeechBubble(this.text, {super.key, this.tail = true});
   final String text;
   final bool tail;
+
+  static const _fill = Color(0xFFFFF8EC);
 
   @override
   Widget build(BuildContext context) {
@@ -149,36 +158,37 @@ class SpeechBubble extends StatelessWidget {
       clipBehavior: Clip.none,
       alignment: Alignment.bottomCenter,
       children: [
-        if (tail)
+        if (tail) ...[
           Positioned(
-            bottom: -8,
-            child: Transform.rotate(
-              angle: .785,
+            bottom: -9,
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                  color: _fill, shape: BoxShape.circle, boxShadow: Gloss.soft(3)),
+            ),
+          ),
+          Positioned(
+            bottom: -21,
+            child: Transform.translate(
+              offset: const Offset(-8, 0),
               child: Container(
-                width: 16,
-                height: 16,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFFBF2),
-                  border: Border(
-                    right: Ink2.border,
-                    bottom: Ink2.border,
-                  ),
-                ),
+                width: 9,
+                height: 9,
+                decoration: BoxDecoration(
+                    color: _fill, shape: BoxShape.circle, boxShadow: Gloss.soft(2)),
               ),
             ),
           ),
+        ],
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
-          child: Container(
+          child: GlossBox(
             key: ValueKey(text),
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFFBF2),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.ink, width: 2),
-              boxShadow: Ink2.shadow(),
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: Gloss.pearl(),
+            shine: .9,
             child: Text(text,
                 textAlign: TextAlign.center,
                 style: AppText.body.copyWith(fontSize: 15.5, fontWeight: FontWeight.w500)),
@@ -189,7 +199,7 @@ class SpeechBubble extends StatelessWidget {
   }
 }
 
-/// The Hebrew date in a little calendar tile ("כ״ח / כסלו").
+/// The Hebrew date on a glossy blue coin ("כ״ח / כסלו").
 class DateTile extends StatelessWidget {
   const DateTile({super.key, required this.day, required this.month});
   final String day;
@@ -197,54 +207,49 @@ class DateTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 56,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.ink, width: 2),
-        boxShadow: Ink2.shadow(2, 3),
-      ),
+    return GlossBox(
+      width: 60,
+      height: 60,
+      decoration: Gloss.sky(shape: BoxShape.circle),
+      shine: .4,
+      alignment: Alignment.center,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(day,
-                style: const TextStyle(
-                    fontFamily: AppText.serif, fontSize: 21, fontWeight: FontWeight.w700, height: 1.3)),
-          ),
-          Container(
-            width: double.infinity,
-            color: AppColors.blue,
-            padding: const EdgeInsets.symmetric(vertical: 1),
-            child: Text(month,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
-          ),
+          Text(day,
+              style: const TextStyle(
+                  fontFamily: AppText.serif,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  height: 1.05,
+                  color: Colors.white)),
+          Text(month,
+              style: const TextStyle(
+                  color: Color(0xE6FFFFFF), fontSize: 10.5, fontWeight: FontWeight.w600, height: 1.2)),
         ],
       ),
     );
   }
 }
 
-/// A small outlined chip ("🔥 3").
+/// A small pearl chip ("🔥 3").
 class InkChip extends StatelessWidget {
   const InkChip({super.key, required this.text, this.color = AppColors.card});
   final String text;
   final Color color;
 
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.ink, width: 2),
-          boxShadow: Ink2.shadow(2, 2),
-        ),
+  Widget build(BuildContext context) => GlossBox(
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
+        decoration: color == AppColors.card
+            ? Gloss.pearl(lift: 5)
+            : BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(999),
+                border: Gloss.rim,
+                boxShadow: Gloss.soft(5),
+              ),
+        shine: .8,
         child: Text(text,
             textDirection: TextDirection.ltr,
             style: const TextStyle(
@@ -252,7 +257,7 @@ class InkChip extends StatelessWidget {
       );
 }
 
-/// Round outlined action with a label under it.
+/// A pearl bubble button with a label under it.
 class CircleAction extends StatelessWidget {
   const CircleAction({super.key, required this.emoji, required this.label, required this.onTap});
   final String emoji;
@@ -268,22 +273,18 @@ class CircleAction extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: SizedBox(
-          width: 66,
+          width: 68,
           child: Column(
             children: [
-              Container(
-                width: 52,
-                height: 52,
+              GlossBox(
+                width: 56,
+                height: 56,
+                decoration: Gloss.pearl(shape: BoxShape.circle, lift: 7),
+                shine: .9,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.ink, width: 2),
-                  boxShadow: Ink2.shadow(2, 3),
-                ),
-                child: Text(emoji, style: const TextStyle(fontSize: 22)),
+                child: Text(emoji, style: const TextStyle(fontSize: 23)),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 5),
               Text(label, style: AppText.small.copyWith(fontSize: 12, fontWeight: FontWeight.w500)),
             ],
           ),
@@ -293,7 +294,7 @@ class CircleAction extends StatelessWidget {
   }
 }
 
-/// A plain row with a hairline above it.
+/// A row inside a card, separated by a soft hairline.
 class HairlineRow extends StatelessWidget {
   const HairlineRow({
     super.key,
@@ -316,6 +317,7 @@ class HairlineRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
       child: Container(
         decoration: BoxDecoration(
           border: first ? null : const Border(top: BorderSide(color: AppColors.line)),
@@ -339,7 +341,12 @@ class HairlineRow extends StatelessWidget {
             if (trailing != null)
               trailing!
             else if (onTap != null)
-              const Icon(Icons.chevron_left, color: AppColors.muted),
+              Container(
+                width: 30,
+                height: 30,
+                decoration: Gloss.pearl(shape: BoxShape.circle, lift: 3),
+                child: const Icon(Icons.chevron_left, color: AppColors.muted, size: 20),
+              ),
           ],
         ),
       ),
@@ -347,13 +354,13 @@ class HairlineRow extends StatelessWidget {
   }
 }
 
-/// A raised card: cream, ink outline, hard shadow.
+/// A raised pearl card with big round corners and a soft shadow.
 class SectionCard extends StatelessWidget {
   const SectionCard({
     super.key,
     required this.child,
     this.onTap,
-    this.padding = const EdgeInsets.all(18),
+    this.padding = const EdgeInsets.fromLTRB(22, 18, 22, 18),
     this.highlight = false,
     this.color = AppColors.card,
   });
@@ -364,19 +371,31 @@ class SectionCard extends StatelessWidget {
   final bool highlight;
   final Color color;
 
+  static const radius = 32.0;
+
   @override
   Widget build(BuildContext context) {
+    final r = BorderRadius.circular(radius);
+    final BoxDecoration deco = highlight
+        ? BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFFFF9E4), Color(0xFFFFEDB8)],
+            ),
+            borderRadius: r,
+            border: Gloss.rim,
+            boxShadow: Gloss.glow(const Color(0xFFF2A91E), 8),
+          )
+        : color == AppColors.card
+            ? Gloss.pearl(radius: r)
+            : BoxDecoration(color: color, borderRadius: r, border: Gloss.rim, boxShadow: Gloss.soft());
     return Container(
-      decoration: BoxDecoration(
-        color: highlight ? const Color(0xFFFFF4D6) : color,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.ink, width: 2),
-        boxShadow: Ink2.shadow(3, 4),
-      ),
+      decoration: deco,
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: r,
           onTap: onTap,
           child: Padding(padding: padding, child: child),
         ),
@@ -393,51 +412,91 @@ class GoldBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+    return GlossBox(
+      padding: const EdgeInsets.fromLTRB(16, 12, 18, 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF0C7),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.ink, width: 2),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFFF7DA), Color(0xFFFFE9A8)],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        border: Gloss.rim,
+        boxShadow: Gloss.glow(const Color(0xFFF2A91E), 6),
       ),
+      shine: .7,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.orange, size: 20),
-          const SizedBox(width: 10),
-          Expanded(child: Text(text, style: AppText.body.copyWith(fontSize: 15))),
+          Container(
+            width: 30,
+            height: 30,
+            decoration: Gloss.candy(shape: BoxShape.circle),
+            child: Icon(icon, color: Colors.white, size: 17),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+              child: Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Text(text, style: AppText.body.copyWith(fontSize: 15)),
+          )),
         ],
       ),
     );
   }
 }
 
-/// An earned badge.
+/// A badge: a round coin with an emoji, its name under it. Earned coins
+/// are honey gold; locked ones are a faint empty circle.
 class OlivePill extends StatelessWidget {
-  const OlivePill({super.key, required this.emoji, required this.text, this.earned = true});
+  const OlivePill({
+    super.key,
+    required this.emoji,
+    required this.text,
+    this.earned = true,
+    this.labelColor = AppColors.ink,
+    this.width = 78,
+  });
   final String emoji;
   final String text;
   final bool earned;
+  final Color labelColor;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: earned ? 1 : .4,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 6, 10, 6),
-        decoration: BoxDecoration(
-          color: earned ? AppColors.card : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.ink, width: 2),
-          boxShadow: earned ? Ink2.shadow(2, 2) : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(emoji),
-            const SizedBox(width: 8),
-            Text(text, style: AppText.body.copyWith(fontSize: 14, fontWeight: FontWeight.w500)),
-          ],
+    return Semantics(
+      label: earned ? text : '$text (עוד לא)',
+      excludeSemantics: true,
+      child: SizedBox(
+        width: width,
+        child: Opacity(
+          opacity: earned ? 1 : .45,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GlossBox(
+                width: 60,
+                height: 60,
+                decoration: earned
+                    ? Gloss.honey(shape: BoxShape.circle)
+                    : BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0x0F1E2340),
+                        border: Border.all(color: const Color(0x1F1E2340), width: 2),
+                      ),
+                shine: earned ? .6 : 0,
+                alignment: Alignment.center,
+                child: Text(emoji, style: const TextStyle(fontSize: 24)),
+              ),
+              const SizedBox(height: 5),
+              Text(text,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: AppText.small.copyWith(
+                      fontSize: 11.5, height: 1.2, color: labelColor, fontWeight: FontWeight.w500)),
+            ],
+          ),
         ),
       ),
     );

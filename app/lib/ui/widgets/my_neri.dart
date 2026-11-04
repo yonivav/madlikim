@@ -90,16 +90,18 @@ class NeriPicker extends StatelessWidget {
               onTap: () => onPick(c),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                decoration: BoxDecoration(
-                  color: c.id == selectedId ? const Color(0xFFFFF0C7) : AppColors.card,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.ink, width: 2),
-                  boxShadow: [
-                    if (c.id == selectedId)
-                      const BoxShadow(color: AppColors.gold, spreadRadius: 4),
-                    ...Ink2.shadow(2, 3),
-                  ],
-                ),
+                decoration: c.id == selectedId
+                    ? BoxDecoration(
+                        gradient: const RadialGradient(
+                          center: Alignment(0, -.2),
+                          colors: [Color(0xFFFFF6D8), Color(0xFFFFE08A)],
+                        ),
+                        borderRadius: BorderRadius.circular(40),
+                        border: const Border.fromBorderSide(
+                            BorderSide(color: Colors.white, width: 3)),
+                        boxShadow: Gloss.glow(const Color(0xFFF2A91E), 10),
+                      )
+                    : Gloss.pearl(radius: BorderRadius.circular(40), lift: 6),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

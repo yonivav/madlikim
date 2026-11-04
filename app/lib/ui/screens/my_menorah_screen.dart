@@ -22,7 +22,7 @@ class MyMenorahScreen extends ConsumerWidget {
     final score = ref.watch(scoreProvider);
     final now = ref.watch(nowProvider).valueOrNull ?? DateTime.now().toUtc();
     final tonight = ref.watch(phaseProvider).night?.number;
-    final buddy = (MediaQuery.sizeOf(context).width - 72) / 8;
+    final buddy = (MediaQuery.sizeOf(context).width - 100) / 8;
 
     NeriMood moodFor(HanukkahNight n) {
       if (lit.contains(n.number)) return NeriMood.happy;
@@ -42,30 +42,25 @@ class MyMenorahScreen extends ConsumerWidget {
             height: buddy * 1.5 + 70,
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.ink, width: 2),
-              boxShadow: Ink2.shadow(3, 4),
+              borderRadius: BorderRadius.circular(56),
+              border: const Border.fromBorderSide(
+                  BorderSide(color: Color(0x2EFFFFFF), width: 1.5)),
+              boxShadow: Gloss.glow(AppColors.night, 12),
             ),
             child: NightBackdrop(
               child: Stack(
                 children: [
                   Positioned(
-                    left: 10,
-                    right: 10,
-                    bottom: 22,
+                    left: 24,
+                    right: 24,
+                    bottom: 24,
                     height: 12,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFD9A441),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppColors.ink, width: 2),
-                      ),
-                    ),
+                    child: GlossBox(decoration: Gloss.honey(lift: 4), shine: .7),
                   ),
                   Positioned(
-                    left: 12,
-                    right: 12,
-                    bottom: 32,
+                    left: 30,
+                    right: 30,
+                    bottom: 34,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -88,46 +83,53 @@ class MyMenorahScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _Stat(value: '${score.light}', label: 'אור'),
-              const SizedBox(width: 10),
+              _Stat(value: '${score.light}', label: 'אור', gold: true),
               _Stat(value: '${score.nightsLit}/8', label: 'לילות'),
-              const SizedBox(width: 10),
               _Stat(value: '🔥 ${score.currentStreak}', label: 'ברצף'),
             ],
           ),
           const SizedBox(height: 20),
           const Text('הלילות', style: AppText.title),
-          const SizedBox(height: 4),
-          for (final night in season.nights)
-            HairlineRow(
-              first: night.number == 1,
-              leading: Neri(
-                size: 26,
-                color: NeriColor.forNight(night.number),
-                mood: moodFor(night),
-                lit: lit.contains(night.number),
-                glow: .4,
-                animate: false,
-              ),
-              title: night.title,
-              subtitle: '${night.hebrewDateLabel}, ${night.day}.${night.month}',
-              trailing: lit.contains(night.number)
-                  ? const Icon(Icons.check_circle, color: AppColors.olive)
-                  : night.hasStarted(now)
-                      ? const Icon(Icons.chevron_left, color: AppColors.muted)
-                      : const SizedBox.shrink(),
-              onTap: night.hasStarted(now) && !lit.contains(night.number)
-                  ? () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => LightingScreen(night: night)))
-                  : null,
+          const SizedBox(height: 10),
+          SectionCard(
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 4),
+            child: Column(
+              children: [
+                for (final night in season.nights)
+                  HairlineRow(
+                    first: night.number == 1,
+                    leading: Neri(
+                      size: 26,
+                      color: NeriColor.forNight(night.number),
+                      mood: moodFor(night),
+                      lit: lit.contains(night.number),
+                      glow: .4,
+                      animate: false,
+                    ),
+                    title: night.title,
+                    subtitle: '${night.hebrewDateLabel}, ${night.day}.${night.month}',
+                    trailing: lit.contains(night.number)
+                        ? const Icon(Icons.check_circle, color: AppColors.olive)
+                        : night.hasStarted(now)
+                            ? const Icon(Icons.chevron_left, color: AppColors.muted)
+                            : const SizedBox.shrink(),
+                    onTap: night.hasStarted(now) && !lit.contains(night.number)
+                        ? () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => LightingScreen(night: night)))
+                        : null,
+                  ),
+              ],
             ),
+          ),
           const SizedBox(height: 20),
           const Text('תגים', style: AppText.title),
           const SizedBox(height: 10),
           Wrap(
-            spacing: 8,
-            runSpacing: 10,
+            alignment: WrapAlignment.spaceAround,
+            spacing: 4,
+            runSpacing: 14,
             children: [
               for (final b in Achievement.values)
                 Tooltip(
@@ -154,28 +156,30 @@ class MyMenorahScreen extends ConsumerWidget {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat({required this.value, required this.label});
+  const _Stat({required this.value, required this.label, this.gold = false});
   final String value;
   final String label;
+  final bool gold;
 
   @override
-  Widget build(BuildContext context) => Expanded(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.ink, width: 2),
-            boxShadow: Ink2.shadow(2, 3),
-          ),
-          child: Column(
-            children: [
-              Text(value,
-                  textDirection: TextDirection.ltr,
-                  style: AppText.numeral.copyWith(fontSize: 26)),
-              Text(label, style: AppText.small),
-            ],
-          ),
+  Widget build(BuildContext context) => GlossBox(
+        width: 96,
+        height: 96,
+        decoration: gold
+            ? Gloss.honey(shape: BoxShape.circle)
+            : Gloss.pearl(shape: BoxShape.circle),
+        shine: gold ? .55 : .9,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(value,
+                textDirection: TextDirection.ltr,
+                style: AppText.numeral.copyWith(fontSize: 26)),
+            Text(label,
+                style: AppText.small.copyWith(
+                    color: gold ? const Color(0xFF7A4A00) : AppColors.muted)),
+          ],
         ),
       );
 }
