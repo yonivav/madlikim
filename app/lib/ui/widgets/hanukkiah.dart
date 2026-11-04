@@ -16,7 +16,11 @@ class Hanukkiah extends StatelessWidget {
     this.shamashLit = true,
     this.showOrder = false,
     this.width = 360,
+    this.shamashLook = const NeriLook(NeriColor.apricot, pattern: NeriPattern.none),
   });
+
+  /// The shamash is the user's own character.
+  final NeriLook shamashLook;
 
   /// How many candles stand in the cups (tonight's night number).
   final int placed;
@@ -53,6 +57,7 @@ class Hanukkiah extends StatelessWidget {
               left: (180 - 21) * s,
               top: 52 * s,
               child: Neri(
+                look: shamashLook,
                 size: 42 * s,
                 mood: NeriMood.wink,
                 lit: shamashLit,

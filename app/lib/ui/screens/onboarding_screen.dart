@@ -8,6 +8,7 @@ import '../../models/user_profile.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/my_neri.dart';
 import '../widgets/neri.dart';
 import '../widgets/scene.dart';
 
@@ -33,6 +34,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Nusach _nusach = Nusach.unknown;
   HouseholdMode _household = HouseholdMode.everyone;
   bool _saving = false;
+  String _neriId = 'neri';
 
   @override
   void dispose() {
@@ -84,6 +86,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     setState(() => _saving = true);
     final profile = UserProfile(
       displayName: _name.text.trim(),
+      neriId: _neriId,
       addressForm: _form,
       nusach: _nusach,
       householdMode: _household,
@@ -117,7 +120,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               child: Row(
                 children: [
-                  for (var i = 0; i < 3; i++)
+                  for (var i = 0; i < 4; i++)
                     Expanded(
                       child: Container(
                         height: 4,
@@ -136,7 +139,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 controller: _pages,
                 physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (p) => setState(() => _page = p),
-                children: [_namePage(), _placePage(), _remindersPage()],
+                children: [_pickPage(), _namePage(), _placePage(), _remindersPage()],
               ),
             ),
           ],
@@ -151,30 +154,81 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             style: AppText.display),
       );
 
+  NeriCharacter get _buddy => NeriCharacter.byId(_neriId);
+
+  /// First thing: pick your candle.
+  Widget _pickPage() {
+    final content = ref.watch(contentProvider);
+    final c = _buddy;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      children: [
+        Text('בחרו את הנר שלכם', textAlign: TextAlign.center, style: AppText.display),
+        const SizedBox(height: 4),
+        Text('הוא יזכיר לכם להדליק, ויחגוג איתכם כל ערב',
+            textAlign: TextAlign.center, style: AppText.small.copyWith(fontSize: 14.5)),
+        const SizedBox(height: 14),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: SpeechBubble(buddyLine(content, c, 'picked')),
+        ),
+        SizedBox(
+          height: 210,
+          child: Center(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              transitionBuilder: (child, a) => ScaleTransition(
+                  scale: Tween(begin: .85, end: 1.0)
+                      .animate(CurvedAnimation(parent: a, curve: Curves.easeOutBack)),
+                  child: FadeTransition(opacity: a, child: child)),
+              child: Neri(
+                key: ValueKey(c.id),
+                look: c.look,
+                size: 128,
+                mood: NeriMood.excited,
+                arms: NeriArms.wave,
+                semanticLabel: '${c.name}, ${c.line}',
+              ),
+            ),
+          ),
+        ),
+        Text(c.line, textAlign: TextAlign.center, style: AppText.small.copyWith(fontSize: 14)),
+        const SizedBox(height: 14),
+        NeriPicker(
+          selectedId: _neriId,
+          onPick: (picked) => setState(() => _neriId = picked.id),
+        ),
+        const SizedBox(height: 22),
+        BrassButton(
+            label: '${c.name} ${c.feminine ? 'היא' : 'הוא'} הנר שלי!', onPressed: _next),
+      ],
+    );
+  }
+
   Widget _namePage() {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 8),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 40),
-          child: SpeechBubble('היי! אני נרי 👋'),
-        ),
         SizedBox(
-          height: 230,
+          height: 200,
           child: Stack(
             alignment: Alignment.bottomCenter,
-            children: const [
-              Positioned(right: 0, bottom: 0, child: OliveBranch(size: 100)),
-              Neri(size: 140, arms: NeriArms.wave, semanticLabel: 'נרי מנופף לשלום'),
+            children: [
+              const Positioned(right: 0, bottom: 0, child: OliveBranch(size: 100)),
+              Neri(
+                look: _buddy.look,
+                size: 120,
+                arms: NeriArms.wave,
+                semanticLabel: _buddy.name,
+              ),
             ],
           ),
         ),
         const SizedBox(height: 4),
         Text('אני אזכיר לך להדליק כל ערב בחנוכה, ונדליק ביחד.',
             textAlign: TextAlign.center, style: AppText.small.copyWith(fontSize: 15)),
-        const SizedBox(height: 16),
-        const SizedBox(height: 12),
+        const SizedBox(height: 20),
         _page0Title('איך לקרוא לך?'),
         TextField(
           controller: _name,
@@ -215,7 +269,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        const Center(child: Neri(size: 90, mood: NeriMood.calm, animate: false)),
+        Center(child: Neri(look: _buddy.look, size: 90, mood: NeriMood.calm, animate: false)),
         _page0Title('איפה מדליקים?'),
         const Text(
           'רק בשביל לדעת מתי שקיעה אצלך. המיקום לא יוצא מהטלפון.',
@@ -257,7 +311,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        const Center(child: Neri(size: 90, arms: NeriArms.up, animate: false)),
+        Center(child: Neri(look: _buddy.look, size: 90, arms: NeriArms.up, animate: false)),
         _page0Title('מתי להזכיר?'),
         RadioGroup<ReminderMode>(
           groupValue: _mode,

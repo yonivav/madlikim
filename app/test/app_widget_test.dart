@@ -76,7 +76,8 @@ void main() {
 
   testWidgets('first launch shows onboarding', (tester) async {
     await boot(tester, now: il(2026, 11, 1, 12));
-    expect(find.textContaining('איך לקרוא לך'), findsOneWidget);
+    expect(find.text('בחרו את הנר שלכם'), findsOneWidget);
+    expect(find.text('נרי הוא הנר שלי!'), findsOneWidget);
   });
 
   testWidgets('weeknight in the window: big button, mark lit, celebrate',

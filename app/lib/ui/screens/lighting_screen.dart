@@ -9,6 +9,7 @@ import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/hanukkiah.dart';
+import '../widgets/my_neri.dart';
 import '../widgets/neri.dart';
 import 'celebration_screen.dart';
 import 'songs_screen.dart';
@@ -110,6 +111,7 @@ class _LightingScreenState extends ConsumerState<LightingScreen> {
                         placed: night.number,
                         lit: lit ? {for (var i = 0; i < night.number; i++) i} : const {},
                         showOrder: !lit,
+                        shamashLook: ref.watch(myNeriProvider).look,
                         width: (width - 28).clamp(0.0, 420.0).toDouble(),
                       ),
                     ),
@@ -193,11 +195,10 @@ class _LightingScreenState extends ConsumerState<LightingScreen> {
                   child: IgnorePointer(
                     child: Transform.rotate(
                       angle: -.18,
-                      child: const Neri(
+                      child: const MyNeri(
                         size: 84,
                         mood: NeriMood.happy,
                         arms: NeriArms.wave,
-                        semanticLabel: 'נרי',
                       ),
                     ),
                   ),

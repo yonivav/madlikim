@@ -6,6 +6,8 @@ import '../../models/user_profile.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/my_neri.dart';
+import '../widgets/neri.dart';
 
 /// Vision 28.13
 class SettingsScreen extends ConsumerWidget {
@@ -33,6 +35,37 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         children: [
           header('עליי'),
+          Builder(builder: (context) {
+            final buddy = NeriCharacter.byId(profile.neriId);
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Neri(look: buddy.look, size: 34, animate: false),
+              title: const Text('הנר שלי'),
+              subtitle: Text('${buddy.name}, ${buddy.line}'),
+              trailing: const Icon(Icons.chevron_left),
+              onTap: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (sheet) => Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('בחרו את הנר שלכם', style: AppText.title),
+                      const SizedBox(height: 14),
+                      NeriPicker(
+                        selectedId: profile.neriId,
+                        onPick: (c) {
+                          save(profile.copyWith(neriId: c.id));
+                          Navigator.pop(sheet);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('שם'),

@@ -63,9 +63,13 @@ class UserProfile {
     this.place = Cities.telAviv,
     this.reminders = const ReminderSettings(),
     this.showTransliteration = false,
+    this.neriId = 'neri',
   });
 
   final String displayName;
+
+  /// Which candle character the user picked (see NeriCharacter.all).
+  final String neriId;
   final AddressForm addressForm;
   final Nusach nusach;
   final HouseholdMode householdMode;
@@ -81,6 +85,7 @@ class UserProfile {
     Place? place,
     ReminderSettings? reminders,
     bool? showTransliteration,
+    String? neriId,
   }) =>
       UserProfile(
         displayName: displayName ?? this.displayName,
@@ -90,6 +95,7 @@ class UserProfile {
         place: place ?? this.place,
         reminders: reminders ?? this.reminders,
         showTransliteration: showTransliteration ?? this.showTransliteration,
+        neriId: neriId ?? this.neriId,
       );
 
   Map<String, dynamic> toJson() => {
@@ -100,6 +106,7 @@ class UserProfile {
         'place': place.toJson(),
         'reminders': reminders.toJson(),
         'showTransliteration': showTransliteration,
+        'neriId': neriId,
       };
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
@@ -117,5 +124,6 @@ class UserProfile {
                 json['reminders'] as Map<String, dynamic>)
             : const ReminderSettings(),
         showTransliteration: json['showTransliteration'] as bool? ?? false,
+        neriId: json['neriId'] as String? ?? 'neri',
       );
 }

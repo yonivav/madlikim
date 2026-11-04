@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/my_neri.dart';
 import '../widgets/neri.dart';
 import '../widgets/scene.dart';
 
@@ -19,6 +20,8 @@ class ShabbatView extends ConsumerWidget {
     final season = ref.watch(seasonProvider);
     final now = ref.watch(nowProvider).valueOrNull ?? DateTime.now().toUtc();
     final inHanukkah = !now.isBefore(season.first.dayStart) && now.isBefore(season.end);
+    final buddy = ref.watch(myNeriProvider);
+    final resting = buddyLine(ref.watch(contentProvider), buddy, 'shabbat');
 
     return Scaffold(
       backgroundColor: AppColors.night,
@@ -30,7 +33,7 @@ class ShabbatView extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Neri(size: 170, mood: NeriMood.sleep, semanticLabel: 'נרי ישן'),
+                const MyNeri(size: 170, mood: NeriMood.sleep),
                 const SizedBox(height: 26),
                 const Text('שבת שלום',
                     style: TextStyle(
@@ -42,7 +45,7 @@ class ShabbatView extends ConsumerWidget {
                 if (endsAt != null)
                   Text(
                     inHanukkah
-                        ? 'נרי נח עכשיו.\nנתראה במוצאי שבת ב־${hhmm(endsAt!, place)}'
+                        ? '$resting\nנתראה במוצאי שבת ב־${hhmm(endsAt!, place)}'
                         : 'נתראה במוצאי שבת, ${hhmm(endsAt!, place)}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(

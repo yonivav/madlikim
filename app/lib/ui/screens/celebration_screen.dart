@@ -9,6 +9,7 @@ import '../../logic/scoring.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/my_neri.dart';
 import '../widgets/neri.dart';
 import '../widgets/scene.dart';
 import 'songs_screen.dart';
@@ -48,7 +49,8 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
     final content = ref.read(contentProvider);
     _line = widget.late
         ? content.randomLine('lateCelebrations')
-        : content.text('neri.celebrate');
+        : buddyLine(content, ref.read(myNeriProvider), 'celebrate',
+            index: widget.night.number);
   }
 
   @override
@@ -110,12 +112,11 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
               child: Column(
                 children: [
                   const Spacer(flex: 2),
-                  Neri(
+                  MyNeri(
                     size: 190,
                     mood: _done ? NeriMood.excited : NeriMood.happy,
                     arms: _neriLit ? NeriArms.up : NeriArms.down,
                     lit: _neriLit,
-                    semanticLabel: 'נרי שמח',
                   ),
                   const SizedBox(height: 10),
                   // Tonight's buddies, lighting one by one (newest first).

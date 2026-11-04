@@ -6,6 +6,7 @@ import '../../logic/scoring.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/my_neri.dart';
 import '../widgets/neri.dart';
 import '../widgets/scene.dart';
 import 'lighting_screen.dart';
@@ -31,7 +32,7 @@ class MyMenorahScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('החבר\'ה של נרי')),
+      appBar: AppBar(title: Text('החבר\'ה של ${ref.watch(myNeriProvider).name}')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(18, 0, 18, 24),
         children: [

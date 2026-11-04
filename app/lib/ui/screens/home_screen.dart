@@ -9,6 +9,7 @@ import '../../core/hebrew_numerals.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/my_neri.dart';
 import '../widgets/neri.dart';
 import '../widgets/scene.dart';
 import 'invite_screens.dart';
@@ -51,7 +52,9 @@ class HomeScreen extends ConsumerWidget {
       tileMonth = hebrewMonthName(h.month, leapYear: HebrewCalendar.isLeapYear(h.year));
     }
 
-    String neri(String key, {Map<String, Object?> vars = const {}}) => content.text('neri.$key',
+    final buddy = ref.watch(myNeriProvider);
+    String neri(String key, {Map<String, Object?> vars = const {}}) => buddyLine(
+        content, buddy, key,
         form: profile.addressForm, vars: vars, index: night?.number ?? 0);
 
     late String title;
@@ -204,12 +207,12 @@ class HomeScreen extends ConsumerWidget {
                 const Positioned(left: -10, bottom: 0, child: OliveBranch(flip: true)),
                 Positioned(
                   bottom: 14,
-                  child: Neri(
+                  child: MyNeri(
                     size: 180,
                     mood: mood,
                     arms: arms,
                     lit: lit,
-                    semanticLabel: 'נרי, $bubble',
+                    semanticLabel: '${buddy.name}, $bubble',
                   ),
                 ),
               ],
