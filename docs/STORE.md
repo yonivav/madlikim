@@ -14,7 +14,7 @@
 | דירוג גיל | 4+ / Everyone |
 | מחיר | חינם, בלי רכישות, בלי פרסומות |
 | שפה ראשית | עברית |
-| מדיניות פרטיות | `https://[הדומיין]/privacy/` (הקובץ ב-`web/privacy/index.html`) |
+| מדיניות פרטיות | `https://yonivav.github.io/madlikim/privacy/` (הקובץ ב-`web/privacy/index.html`, עולה אוטומטית ב-push דרך `.github/workflows/pages.yml`) |
 | כתובת תמיכה | [מייל או דף] |
 
 בחיפוש לא מצאתי אפליקציה קיימת בשם "מדליקים". השם נשמר לך רק כשרושמים אותו ב-App Store Connect, אז כדאי לעשות את זה ראשון.
@@ -121,13 +121,19 @@
 
 ## צ'קליסט לפני הגשה
 
-- [ ] שם נשמר ב-App Store Connect וב-Play Console
-- [ ] `CONTACT_EMAIL` בדף הפרטיות הוחלף, והדף עלה לאוויר
-- [ ] רב אישר את התוכן (`"reviewed": true` בקבצי `content/`)
-- [ ] נגן אישר את האקורדים
-- [ ] CI ירוק (analyze, test, build)
-- [ ] נבדק על אייפון אמיתי ועל אנדרואיד אמיתי (התראות!)
-- [ ] צילומי מסך אמיתיים
-- [ ] גרסה 1.0.0+1, חתימה (Android keystore, iOS signing)
+- [ ] שם נשמר ב-App Store Connect (צריך Apple Developer Program, התחברות ידנית) וב-Play Console (יש כבר חשבון "Leshem Shamaim", האפליקציה עוד לא נוצרה שם)
+- [x] `CONTACT_EMAIL` בדף הפרטיות הוחלף (yonivav@gmail.com), והדף עלה לאוויר ב-GitHub Pages
+- [ ] רב אישר את התוכן (`"reviewed": true` בקבצי `content/`) — חבילת הבדיקה מוכנה ב-`docs/review/rabbi.pdf`
+- [ ] נגן אישר את האקורדים — חבילת הבדיקה מוכנה ב-`docs/review/musician.pdf`
+- [x] CI ירוק (analyze, test, build) — תוקן overflow ב-`shell.dart` שהפיל 2 טסטים
+- [ ] נבדק על אייפון אמיתי ועל אנדרואיד אמיתי (התראות!) — רץ על סימולטור, המכשיר הפיזי (Yoni's iPhone15) לא מחובר כרגע
+- [ ] צילומי מסך אמיתיים — האפליקציה רצה על סימולטור iPhone 16 Pro Max, נשאר לצלם את שאר המסכים
+- [x] גרסה 1.0.0+1, חתימה: Android יש upload keystore (`~/madlikim-signing/`, לא בגיט); iOS עדיין צריך Apple Developer Program + Xcode signing
 - [ ] TestFlight ו-Internal testing לבטא
 - [ ] **הגשה עד 24.11**
+
+### מה חסר כדי לסיים (דברים שרק אתה יכול לעשות)
+- Apple Developer Program: הרשמה/תשלום, והתחברות ל-App Store Connect (לא התחברתי בשמך, זה דורש Apple ID + 2FA)
+- Google Play: להצהיר "trader status" בחשבון (יש באנר "Action required" ב-Play Console), וליצור את האפליקציה החדשה שם
+- רב ונגן: לשלוח את `docs/review/rabbi.pdf` ו-`docs/review/musician.pdf`, ולעדכן `"reviewed": true` אחרי אישור
+- בדיקה על מכשיר פיזי אמיתי (במיוחד התראות, שלא עובדות טוב בסימולטור)
