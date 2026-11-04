@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Fredoka; src: url(../../../app/assets/fonts/Fredoka.ttf); font-weight: 300 700; }
+@font-face { font-family: Rubik; src: url(../../../app/assets/fonts/Rubik.ttf); font-weight: 300 900; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#3a3d46;font-family:Rubik,sans-serif}
+.phone{width:390px;height:844px;overflow:hidden;position:relative;
+  background:radial-gradient(90% 60% at 50% 30%,#3B3A8E 0%,#1C2463 60%,#121640 100%)}
+.star{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff}
+#stage{position:absolute;left:0;top:70px;width:360px;height:560px;transform-origin:0 0;transform:scale(1.0833)}
+.actor{position:absolute;transform-origin:50% 95.7%}
+.spark{position:absolute;border-radius:50%}
+.panel{position:absolute;left:0;right:0;top:628px;text-align:center}
+.plus{font-family:Fredoka;font-weight:700;font-size:50px;color:#FFC63A;text-shadow:0 0 22px rgba(255,198,58,.6)}
+.bubble{margin:6px 40px 0;border-radius:999px;padding:11px 18px;font-size:15px;font-weight:500;color:#1E2340;
+  background:linear-gradient(180deg,#fff,#FFF8EC);box-shadow:0 10px 24px -8px rgba(0,0,0,.4)}
+.cta{margin:14px 26px 0;height:56px;border-radius:999px;display:grid;place-items:center;font-family:Fredoka;font-weight:600;font-size:20px;color:#fff;
+  background:linear-gradient(180deg,#FF9A5C,#F26B2A 55%,#DD5216);box-shadow:0 14px 26px -10px rgba(242,107,42,.75)}
+.halo{position:absolute;border-radius:50%;pointer-events:none}
+</style>
+<script src="neri.js"></script><script src="show.js"></script>
+</head><body>
+<div class="phone" id="phone">
+  <div id="stars"></div>
+  <div id="stage">
+    <div class="halo" id="halo"></div>
+    <svg id="menorah" viewBox="0 0 360 200" width="360" height="200" style="position:absolute;left:0;top:300px"></svg>
+    <div id="actors"></div>
+    <div id="sparks"></div>
+  </div>
+  <div class="panel" id="panel"><div class="plus"><span dir="ltr" id="plus">+4</span> אור</div>
+    <div class="bubble">וואו! איזה אור. גם השכנים רואים 😉</div>
+    <div class="cta">לשתף את החבר'ה</div></div>
+</div>
+<script>
+const params = new URLSearchParams(location.search);
+const N = +(params.get('n') || 4);
+const ME = CHARACTERS.find(c => c.id === (params.get('me') || 'neri'));
+const meTip = ({classic:82, slim:64, chubby:100}[ME.build] - 70) / 300;
+document.getElementById('plus').textContent = '+' + N;
+document.getElementById('stars').innerHTML = Array.from({length:40},(_,i)=>`<div class="star" style="left:${(i*131)%385}px;top:${(i*71)%780+20}px;opacity:${.2+(i%4)*.15}"></div>`).join('');
+// brass hanukkiah, same drawing as the app
+document.getElementById('menorah').innerHTML = `<defs><linearGradient id="br" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset=".6" stop-color="#E2A43A"/><stop offset="1" stop-color="#C9852A"/></linearGradient></defs>
+  <g transform="translate(0 30)">
+  <path d="M30 130 Q 100 165 180 165 Q 260 165 330 130" stroke="url(#br)" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M20 128 H340" stroke="url(#br)" stroke-width="9" stroke-linecap="round"/><path d="M28 125.5 H332" stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
+  <path d="M180 128 V 164 M180 128 V 92" stroke="url(#br)" stroke-width="7" stroke-linecap="round"/><ellipse cx="180" cy="167" rx="32" ry="6" fill="url(#br)"/>
+  ${[0,1,2,3,4,5,6,7].map(p=>[posX(p),118]).concat([[180,82]]).map(([x,y])=>`<ellipse cx="${x}" cy="${y+5}" rx="14" ry="7" fill="url(#br)"/><ellipse cx="${x}" cy="${y+2.5}" rx="7.5" ry="2" fill="#fff" opacity=".6"/>`).join('')}</g>`;
+
+const umbrella = (u) => `<svg viewBox="0 0 60 60" width="${u.w}" height="${u.w}" style="position:absolute;left:${u.x-u.w/2}px;top:${u.y-u.w*.85}px;transform:rotate(${u.rot}rad) scaleY(${.3+.7*u.open});transform-origin:50% 100%;opacity:${u.open}">
+  <path d="M30 50 V 22" stroke="#1E2340" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M4 26 Q 30 -6 56 26 Q 49 21 43 26 Q 36 20 30 26 Q 24 20 17 26 Q 11 21 4 26 Z" fill="#FF8FAE"/>
+  <path d="M17 26 Q 22 6 30 4 Q 26 14 30 26" fill="#FFC63A"/><path d="M43 26 Q 38 6 30 4 Q 34 14 30 26" fill="#7FB0FF"/>
+  <path d="M12 16 Q 20 8 28 7" stroke="#fff" stroke-width="2.5" opacity=".7" fill="none" stroke-linecap="round"/></svg>`;
+
+const cache = {};
+function svgFor(a) {
+  const key = [a.id, a.lit, a.mood, a.arms].join('|');
+  if (!cache[key]) cache[key] = a.kind === 'me'
+    ? neri({look: ME, mood: a.mood, arms: a.arms, lit: a.lit, glow: .9})
+    : neri({color: NIGHT_COLORS[a.p], mood: a.mood, arms: a.arms, lit: a.lit, glow: .6});
+  return cache[key];
+}
+
+window.render = function (t) {
+  const f = showFrame(t, N, meTip);
+  document.getElementById('menorah').style.opacity = f.menorah;
+  const litCount = f.actors.filter(a => a.lit).length;
+  const halo = document.getElementById('halo');
+  const hs = 200 + litCount * 30;
+  halo.style.cssText += `;left:${180-hs/2}px;top:${(f.menorah < .8 ? 200 : 390)-hs/2}px;width:${hs}px;height:${hs}px;background:radial-gradient(circle,rgba(255,200,90,${.12+litCount*.05}),transparent 65%)`;
+  document.getElementById('actors').innerHTML = f.actors.map(a =>
+    `<div class="actor" style="left:${a.x-a.w/2}px;top:${a.y-SHOW.FEET*a.w}px;width:${a.w}px;height:${a.w*1.5}px;transform:rotate(${a.rot}rad)">${svgFor(a)}</div>`).join('')
+    + (f.umbrella ? umbrella(f.umbrella) : '');
+  document.getElementById('sparks').innerHTML = f.sparks.map(s =>
+    `<div class="spark" style="left:${s.x-s.r}px;top:${s.y-s.r}px;width:${s.r*2}px;height:${s.r*2}px;opacity:${s.alpha};background:${s.gold?'#FFD45C':'#fff'};box-shadow:0 0 ${s.r*3}px ${s.gold?'#FFB020':'#FFE9A0'}"></div>`).join('');
+  const panel = document.getElementById('panel');
+  const pu = Math.max(0, Math.min(1, (t - (f.end - 1.2)) / .4));
+  panel.style.opacity = pu; panel.style.transform = `translateY(${(1-pu)*30}px)`;
+  return f.end;
+};
+if (!params.get('still')) {
+  const t0 = performance.now();
+  const loop = () => { const end = render(((performance.now() - t0) / 1000) % (showTiming(N).end + 1.5)); requestAnimationFrame(loop); };
+  loop();
+}
+</script></body></html>

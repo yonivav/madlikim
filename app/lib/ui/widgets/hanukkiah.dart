@@ -52,7 +52,7 @@ class Hanukkiah extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned.fill(child: CustomPaint(painter: _FramePainter())),
+            Positioned.fill(child: CustomPaint(painter: HanukkiahFramePainter())),
             Positioned(
               left: (180 - 21) * s,
               top: 52 * s,
@@ -107,7 +107,7 @@ class Hanukkiah extends StatelessWidget {
 
 /// A brass hanukkiah: soft gold strokes with round ends, oval cups with a
 /// little shine. No ink outlines, so it sits in the glossy style.
-class _FramePainter extends CustomPainter {
+class HanukkiahFramePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.scale(size.width / 360, size.height / 200);
@@ -165,5 +165,5 @@ class _FramePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_FramePainter old) => false;
+  bool shouldRepaint(HanukkiahFramePainter old) => false;
 }

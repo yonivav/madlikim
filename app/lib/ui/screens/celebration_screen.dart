@@ -1,7 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/hanukkah.dart';
@@ -9,13 +6,13 @@ import '../../logic/scoring.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/lighting_show.dart';
 import '../widgets/my_neri.dart';
-import '../widgets/neri.dart';
 import '../widgets/scene.dart';
 import 'songs_screen.dart';
 
-/// The one big moment: Neri catches fire, tonight's buddies light up one by
-/// one, confetti falls, "+N אור".
+/// The one big moment: "passing the flame" (see [LightingShow]), then
+/// "+N אור", a line from the user's candle, and what to do next.
 class CelebrationScreen extends ConsumerStatefulWidget {
   const CelebrationScreen({
     super.key,
@@ -37,10 +34,7 @@ class CelebrationScreen extends ConsumerStatefulWidget {
 }
 
 class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
-  int _litCount = 0;
-  bool _neriLit = false;
   bool _done = false;
-  Timer? _timer;
   late final String _line;
 
   @override
@@ -54,157 +48,117 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_timer != null || _done) return;
-    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
-    final n = widget.night.number;
-    if (still) {
-      _neriLit = true;
-      _litCount = n;
-      _done = true;
-      return;
-    }
-    var step = 0;
-    _timer = Timer.periodic(const Duration(milliseconds: 380), (t) {
-      if (!mounted) {
-        t.cancel();
-        return;
-      }
-      setState(() {
-        if (step == 0) {
-          _neriLit = true; // the shamash
-          HapticFeedback.mediumImpact();
-        } else if (_litCount < n) {
-          _litCount++;
-          HapticFeedback.selectionClick();
-        } else {
-          _done = true;
-          t.cancel();
-          HapticFeedback.heavyImpact();
-        }
-        step++;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final content = ref.watch(contentProvider);
     final score = ref.watch(scoreProvider);
+    final me = ref.watch(myNeriProvider);
     final newBadges = score.badges.difference(widget.badgesBefore);
-    final n = widget.night.number;
-    final buddy = (MediaQuery.sizeOf(context).width - 48) / 8.6;
 
     return Scaffold(
       backgroundColor: AppColors.night,
       body: NightBackdrop(
         child: Stack(
           children: [
-            if (_neriLit) const Positioned.fill(child: ConfettiFall()),
+            if (_done) const Positioned.fill(child: IgnorePointer(child: ConfettiFall())),
             SafeArea(
               child: Column(
                 children: [
-                  const Spacer(flex: 2),
-                  MyNeri(
-                    size: 190,
-                    mood: _done ? NeriMood.excited : NeriMood.happy,
-                    arms: _neriLit ? NeriArms.up : NeriArms.down,
-                    lit: _neriLit,
-                  ),
-                  const SizedBox(height: 10),
-                  // Tonight's buddies, lighting one by one (newest first).
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (var i = 0; i < n; i++)
-                        Neri(
-                          size: buddy,
-                          color: NeriColor.forNight(i + 1),
-                          mood: i >= n - _litCount ? NeriMood.happy : NeriMood.calm,
-                          lit: i >= n - _litCount,
-                          glow: .5,
-                          animate: false,
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 500),
-                    opacity: _done ? 1 : 0,
-                    child: AnimatedSlide(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.easeOutBack,
-                      offset: _done ? Offset.zero : const Offset(0, .3),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('+${widget.light}', textDirection: TextDirection.ltr, style: _plus),
-                              const SizedBox(width: 12),
-                              const Text('אור', style: _plus),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(28, 8, 28, 0),
-                            child: SpeechBubble(_line, tail: false),
-                          ),
-                          if (score.currentStreak >= 2)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: InkChip(text: '🔥 ${score.currentStreak} לילות ברצף'),
-                            ),
-                          for (final b in newBadges)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: OlivePill(
-                                emoji: badgeInfo[b]!.emoji,
-                                text: 'תג חדש: ${badgeInfo[b]!.title}',
-                                labelColor: AppColors.onNight,
-                                width: 160,
-                              ),
-                            ),
-                        ],
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: LightingShow(
+                        night: widget.night.number,
+                        me: me.look,
+                        onDone: () {
+                          if (mounted) setState(() => _done = true);
+                        },
                       ),
                     ),
                   ),
-                  const Spacer(flex: 3),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(26, 0, 26, 8),
-                    child: Column(
-                      children: [
-                        BrassButton(
-                          label: 'לשתף את החבר\'ה',
-                          icon: Icons.ios_share,
-                          onPressed: () {
-                            ref.read(localStoreProvider).logEvent('share_tapped', {'kind': 'lit'});
-                            shareText(content.text('share.lit', vars: {
-                              'title': widget.night.title,
-                              'link': content.appLink,
-                            }));
-                          },
+                  // The panel slides in after the show; until then the show
+                  // gets the whole screen and then shrinks to make room.
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 550),
+                    curve: Curves.easeOutCubic,
+                    child: !_done
+                        ? const SizedBox(width: double.infinity)
+                        : TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeOut,
+                            builder: (context, v, child) => Opacity(
+                              opacity: v,
+                              child: Transform.translate(offset: Offset(0, 24 * (1 - v)), child: child),
+                            ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(26, 0, 26, 8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('+${widget.light}',
+                                      textDirection: TextDirection.ltr, style: _plus),
+                                  const SizedBox(width: 12),
+                                  const Text('אור', style: _plus),
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(2, 4, 2, 0),
+                                child: SpeechBubble(_line, tail: false),
+                              ),
+                              if (score.currentStreak >= 2 || newBadges.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 12),
+                                  child: Wrap(
+                                    alignment: WrapAlignment.center,
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    spacing: 12,
+                                    runSpacing: 8,
+                                    children: [
+                                      if (score.currentStreak >= 2)
+                                        InkChip(text: '🔥 ${score.currentStreak} לילות ברצף'),
+                                      for (final b in newBadges)
+                                        OlivePill(
+                                          emoji: badgeInfo[b]!.emoji,
+                                          text: 'תג חדש: ${badgeInfo[b]!.title}',
+                                          labelColor: AppColors.onNight,
+                                          width: 120,
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              const SizedBox(height: 16),
+                              BrassButton(
+                                label: 'לשתף את החבר\'ה',
+                                icon: Icons.ios_share,
+                                onPressed: () {
+                                  ref
+                                      .read(localStoreProvider)
+                                      .logEvent('share_tapped', {'kind': 'lit'});
+                                  shareText(content.text('share.lit', vars: {
+                                    'title': widget.night.title,
+                                    'link': content.appLink,
+                                  }));
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              BrassButton(
+                                label: 'מעוז צור, עם אקורדים',
+                                night: true,
+                                onPressed: () => Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(builder: (_) => const SongsScreen())),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                style: TextButton.styleFrom(foregroundColor: AppColors.onNight),
+                                child: const Text('חזרה לבית'),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 12),
-                        BrassButton(
-                          label: 'מעוז צור, עם אקורדים',
-                          night: true,
-                          onPressed: () => Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (_) => const SongsScreen())),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: TextButton.styleFrom(foregroundColor: AppColors.onNight),
-                          child: const Text('חזרה לבית'),
-                        ),
-                      ],
-                    ),
+                          ),
                   ),
                 ],
               ),
@@ -217,7 +171,7 @@ class _CelebrationScreenState extends ConsumerState<CelebrationScreen> {
 
   static const _plus = TextStyle(
     fontFamily: AppText.round,
-    fontSize: 54,
+    fontSize: 46,
     height: 1.1,
     fontWeight: FontWeight.w700,
     color: AppColors.gold,

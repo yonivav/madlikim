@@ -9,6 +9,7 @@ import 'package:madlikim/notifications/notification_planner.dart';
 import 'package:madlikim/notifications/notification_service.dart';
 import 'package:madlikim/social/local_social_repository.dart';
 import 'package:madlikim/state/providers.dart';
+import 'package:madlikim/ui/widgets/lighting_show.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
@@ -94,7 +95,11 @@ void main() {
     expect(find.text('הדלקתי'), findsOneWidget);
 
     await tester.tap(find.text('הדלקתי'));
-    await tester.pump(const Duration(seconds: 3));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(LightingShow), findsOneWidget);
+    // The show runs ~6.5s for four candles; then the panel slides in.
+    await tester.pump(const Duration(seconds: 8));
+    await tester.pump(const Duration(seconds: 1));
     expect(find.text('+4'), findsOneWidget);
     expect(container.read(litNightsProvider), {4});
 
