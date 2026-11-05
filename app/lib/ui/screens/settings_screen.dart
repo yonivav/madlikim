@@ -221,6 +221,13 @@ class SettingsScreen extends ConsumerWidget {
                 ? 'מחובר'
                 : 'מצב מקומי (השרת עוד לא מוגדר)'),
           ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('קרדיט למנגינה'),
+            subtitle: const Text(
+                'תווי מעוז צור: עיבוד MIDI מאת Nevuchadnezzar, Wikimedia Commons, רישיון CC BY 2.5.',
+                style: TextStyle(fontSize: 12.5)),
+          ),
           const SizedBox(height: 24),
           OutlinedButton(
             style: OutlinedButton.styleFrom(

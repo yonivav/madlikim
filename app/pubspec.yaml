@@ -34,6 +34,9 @@ dependencies:
   # Keep the screen on while reading the blessings
   wakelock_plus: ^1.2.8
 
+  # Play/stop for the Hanerot Halalu and Maoz Tzur melodies
+  audioplayers: ^6.1.0
+
   # Social layer (optional: the app falls back to local mode when Firebase is not configured)
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.2
@@ -74,6 +77,7 @@ flutter:
 
   assets:
     - assets/content/
+    - assets/audio/
 
   fonts:
     - family: FrankRuhlLibre

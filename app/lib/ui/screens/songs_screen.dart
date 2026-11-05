@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,6 +6,15 @@ import '../../logic/chords.dart';
 import '../../state/providers.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+
+/// Original recordings, not copyrighted performances: Maoz Tzur is the
+/// traditional (public-domain) Ashkenazi melody, Hanerot Halalu an original
+/// chant in the traditional Ahava Raba mode. See docs/AUDIO.md for sourcing
+/// and licensing.
+const _songAudio = {
+  'hanerot_halalu': 'audio/hanerot_halalu.m4a',
+  'maoz_tzur': 'audio/maoz_tzur.m4a',
+};
 
 /// After lighting: הנרות הללו, מעוז צור (with chords), מזמור שיר.
 class SongsScreen extends ConsumerStatefulWidget {
@@ -19,6 +29,8 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
   late String _songId = widget.initialSongId;
   bool _chords = true;
   int _transpose = 0;
+  final _player = AudioPlayer();
+  bool _playing = false;
 
   static const _letters = 'אבגדהוזחטי';
   static const _short = {
@@ -26,6 +38,38 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
     'maoz_tzur': 'מעוז צור',
     'mizmor_shir': 'מזמור שיר',
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _player.onPlayerComplete.listen((_) {
+      if (mounted) setState(() => _playing = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
+  Future<void> _toggleAudio(String asset) async {
+    if (_playing) {
+      await _player.stop();
+      if (mounted) setState(() => _playing = false);
+    } else {
+      await _player.play(AssetSource(asset));
+      if (mounted) setState(() => _playing = true);
+    }
+  }
+
+  Future<void> _selectSong(String id) async {
+    if (_playing) {
+      await _player.stop();
+      _playing = false;
+    }
+    setState(() => _songId = id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,14 +97,24 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
                     child: ChoiceChip(
                       label: Text(_short[s.id] ?? s.title),
                       selected: s.id == song.id,
-                      onSelected: (_) => setState(() => _songId = s.id),
+                      onSelected: (_) => _selectSong(s.id),
                     ),
                   ),
               ],
             ),
           ),
           const SizedBox(height: 20),
-          Text(song.title, style: AppText.display),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: Text(song.title, style: AppText.display)),
+              if (_songAudio[song.id] case final asset?)
+                _PlayButton(
+                  playing: _playing,
+                  onTap: () => _toggleAudio(asset),
+                ),
+            ],
+          ),
           const SizedBox(height: 6),
           Text(song.when, style: AppText.small),
           if (song.hasChords) ...[
@@ -101,6 +155,38 @@ class _SongsScreenState extends ConsumerState<SongsScreen> {
                 style: AppText.small.copyWith(fontSize: 13)),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _PlayButton extends StatelessWidget {
+  const _PlayButton({required this.playing, required this.onTap});
+  final bool playing;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: playing ? 'עצור ניגון' : 'נגן את המנגינה',
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: GlossBox(
+          width: 44,
+          height: 44,
+          decoration: playing
+              ? Gloss.honey(shape: BoxShape.circle, lift: 5)
+              : Gloss.pearl(shape: BoxShape.circle, lift: 5),
+          shine: .8,
+          alignment: Alignment.center,
+          child: Icon(
+            playing ? Icons.stop_rounded : Icons.play_arrow_rounded,
+            size: 22,
+            color: AppColors.ink,
+          ),
+        ),
       ),
     );
   }
