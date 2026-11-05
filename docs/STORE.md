@@ -122,13 +122,15 @@
 ## צ'קליסט לפני הגשה
 
 - [ ] שם נשמר ב-App Store Connect (צריך Apple Developer Program, התחברות ידנית) וב-Play Console (יש כבר חשבון "Leshem Shamaim", האפליקציה עוד לא נוצרה שם)
-- [x] `CONTACT_EMAIL` בדף הפרטיות הוחלף (yonivav@gmail.com), והדף עלה לאוויר ב-GitHub Pages
+- [x] `CONTACT_EMAIL` בדף הפרטיות הוחלף (yonivav@gmail.com), והדף עלה לאוויר ב-GitHub Pages: `https://yonivav.github.io/madlikim/privacy/`
 - [ ] רב אישר את התוכן (`"reviewed": true` בקבצי `content/`) — חבילת הבדיקה מוכנה ב-`docs/review/rabbi.pdf`
 - [ ] נגן אישר את האקורדים — חבילת הבדיקה מוכנה ב-`docs/review/musician.pdf`
 - [x] CI ירוק (analyze, test, build) — תוקן overflow ב-`shell.dart` שהפיל 2 טסטים
-- [ ] נבדק על אייפון אמיתי ועל אנדרואיד אמיתי (התראות!) — רץ על סימולטור, המכשיר הפיזי (Yoni's iPhone15) לא מחובר כרגע
-- [ ] צילומי מסך אמיתיים — האפליקציה רצה על סימולטור iPhone 16 Pro Max, נשאר לצלם את שאר המסכים
-- [x] גרסה 1.0.0+1, חתימה: Android יש upload keystore (`~/madlikim-signing/`, לא בגיט); iOS עדיין צריך Apple Developer Program + Xcode signing
+- [x] אייקון וסplash אמיתיים — שני הפלטפורמות היו עדיין עם ברירת המחדל של Flutter (לוגו כחול, מסך פתיחה ריק) למרות שהנכסים והקונפיג היו מוכנים; `flutter_launcher_icons` / `flutter_native_splash` לא רצו בפועל. תוקן.
+- [ ] נבדק על אייפון אמיתי ועל אנדרואיד אמיתי (התראות!) — רץ נקי על סימולטור iPhone 16 Pro Max (אחרי תיקון ה-overflow, מסך הבית נראה תקין), המכשיר הפיזי (Yoni's iPhone15) לא מחובר כרגע
+- [ ] צילומי מסך אמיתיים — האפליקציה רצה ומוכנה על הסימולטור, מחכה להרשאת Accessibility כדי לצלם את שאר המסכים (או שתצלם ידנית)
+- [x] גרסה 1.0.0+1, חתימה: Android יש upload keystore חתום ומאומת (`~/madlikim-signing/`, לא בגיט, **גבה את זה**); iOS עדיין צריך Apple Developer Program + Xcode signing
+- [x] כפתור נגן/עצור להנרות הללו ולמעוז צור (`docs/AUDIO.md` לפרטי הרישוי — מעוז צור בלחן המסורתי נחלת הכלל, הנרות הללו בלחן מקורי)
 - [ ] TestFlight ו-Internal testing לבטא
 - [ ] **הגשה עד 24.11**
 
@@ -137,3 +139,5 @@
 - Google Play: להצהיר "trader status" בחשבון (יש באנר "Action required" ב-Play Console), וליצור את האפליקציה החדשה שם
 - רב ונגן: לשלוח את `docs/review/rabbi.pdf` ו-`docs/review/musician.pdf`, ולעדכן `"reviewed": true` אחרי אישור
 - בדיקה על מכשיר פיזי אמיתי (במיוחד התראות, שלא עובדות טוב בסימולטור)
+- להאזין לכפתורי הנגינה החדשים (מעוז צור / הנרות הללו) ולוודא שזה נשמע טוב — אני לא יכול "לשמוע" בעצמי
+- לגבות את `~/madlikim-signing/madlikim-upload.jks` ו-`key.properties` למקום בטוח (לא בגיט, לא רק במחשב הזה)
